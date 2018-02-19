@@ -1,3 +1,5 @@
-clint
 click
+colorama
+mock
+pytest
 setuptools

@@ -7,7 +7,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'Click',
-        'Clint',
+        'Colorama',
     ],
     entry_points='''
         [console_scripts]

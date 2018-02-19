@@ -1,5 +1,4 @@
 import click
-from clint.textui import colored, puts
 
 @click.group()
 def cli():
@@ -7,6 +6,6 @@ def cli():
 
 @click.command()
 def hello():
-    puts(colored.green('Hello world!'))
+    click.secho('Hello world!', fg='green')
 
 cli.add_command(hello)
