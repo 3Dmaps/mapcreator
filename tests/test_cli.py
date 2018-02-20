@@ -1,5 +1,4 @@
 import click
-import decorator
 from click.testing import CliRunner
 from mapcreator.cli import cli
 
