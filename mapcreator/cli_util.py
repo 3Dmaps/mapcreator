@@ -1,6 +1,6 @@
 import click
 from mapcreator import persistence
-from mapcreator.echoes import *
+from mapcreator import echoes
 
 
 """
@@ -12,7 +12,7 @@ def init_or_error():
     try:
         state = persistence.init_state()
     except Exception as e:
-        error('Unable to initialize project: {}'.format(e))
+        echoes.error('Unable to initialize project: {}'.format(e))
         return None
     else:
         return state
@@ -21,7 +21,7 @@ def load_or_error():
     try:
         state = persistence.load_state()
     except Exception as e:
-        error('Unable to load or initialize the project: {}'.format(e))
+        echoes.error('Unable to load or initialize the project: {}'.format(e))
         return None
     else:
         return state
@@ -30,17 +30,17 @@ def save_or_error(state):
     try:
         persistence.save_state(state)
     except Exception as e:
-        error('Unable to save changes to the project! No changes done!')
-        error('What went wrong: {}'.format(e))
+        echoes.error('Unable to save changes to the project! No changes done!')
+        echoes.error('What went wrong: {}'.format(e))
         return None
     else:
-        return True
+        return state
 
 def clear_or_error():
     try:
         persistence.clear_state()
     except Exception as e:
-        error('Unable to reset project: {}'.format(e))
+        echoes.error('Unable to reset project: {}'.format(e))
         return False
     else:
         return True
