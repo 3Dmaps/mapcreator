@@ -18,6 +18,8 @@ class DummyState:
         new = DummyState()
         new.__dict__ = d
         return new
+    def __str__(self):
+        return '( A dummy state )'
 
 def test_init_state():
     persistence.init_state()
