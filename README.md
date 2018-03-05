@@ -5,7 +5,7 @@ Map creator tool for 3Dmaps application
 This project requires [Python 3](https://www.python.org/downloads/) to run.
 To install, first ensure that pip (included in Python 3.4+) is installed. Navigate to project root. First, run
 ```
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 from your command line. Then, run
 ```
