@@ -1,9 +1,15 @@
 import click
+import subprocess
 from os import path
 from mapcreator import persistence
 from mapcreator.cli_util import *
 from mapcreator.echoes import *
 from mapcreator.state import FileAddResult
+from mapcreator.state import *
+
+from subprocess import run
+from subprocess import call
+
 
 @click.group()
 def cli():
@@ -100,9 +106,24 @@ def build(output):
     Builds the current project.
     Converts the files added to the project to a format understood by the 3dmaps application.
     """
-    state = load_or_error()
-    if not state: return
-    error('Not implemented!') # TODO: Use GDAL etc. to do the actual conversion
+    #state = load_or_error()
+    if not persistence.state_exists(): 
+        info('No project found in current working directory.') 
+        return
+    if load_or_error():
+        state = load_or_error()
+        
+        for line in state.height_files:
+            
+            subprocess.call('gdalwarp -te {} {} {} {} {} {}.bil'.format(state.window['ulx'], state.window['uly'], state.window['lrx'], state.window['lry'],line, line + 'output'))
+            subprocess.call('gdalwarp -t_srs EPSG:3857 -r bilinear {0} {0}output2.bil'.format(line))
+            subprocess.call('gdal_translate -of ENVI {0} {0}output3.bil'.format(line))
+                       
+            #VAIHEESSA
+            # gdalwarp -te 1 1 5 5 -t_srs EPSG:3857 -r bilinear n36w113.img output200.img on myös mahdollista
+            
+           
+    # TODO: Use GDAL etc. to do the actual conversion
 
 
 @click.command()
@@ -133,3 +154,4 @@ cli.add_command(add_height_files)
 cli.add_command(set_window)
 cli.add_command(status)
 cli.add_command(reset)
+cli.add_command(build)
