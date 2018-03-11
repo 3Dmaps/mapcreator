@@ -1,12 +1,13 @@
 import click
 import subprocess
 from os import path
+from mapcreator import building
 from mapcreator import persistence
 from mapcreator.cli_util import *
 from mapcreator.echoes import *
 from mapcreator.state import FileAddResult
-from subprocess import run
-from subprocess import call
+
+
 @click.group()
 def cli():
     """
@@ -96,27 +97,47 @@ def set_window(ulx, uly, lrx, lry):
         success('Window set to {} -> {}'.format((ulx, uly), (lrx, lry)))
 
 @click.command()
-@click.option('--output', '-o', default='3dmapdata.txt')
-def build(output):
-    
-    #state = load_or_error()
+@click.option('--output', '-o', default='3dmapdata.zip', help='Output file name')
+@click.option('--debug', '-d', is_flag=True, help='Causes debug information to be printed during the build')
+@click.option('--clean/--no-clean', default=True, help='Specifies whether to clean temporary build files after building')
+def build(output, debug, clean):
+
+    build_actions = (
+        building.prepare, building.cut_projection_window, building.reproject, building.translate, building.finalize
+    )
+
     if not persistence.state_exists(): 
-        info('No project found in current working directory.')
+        warn('No project found in current working directory.')
         return
-    if load_or_error():
-        state = load_or_error()
+    state = load_or_error()
+    if not state: return
+    if not state.has_height_files():
+        error('No height files have been added to the current project! There\'s nothing to build!')
+        return
+    
+    highlight('STARTING BUILD')
+
+    building.init_build()
+    outfiles = []
+    for index, heightfile in enumerate(state.height_files):
+        info('Processing {}...'.format(heightfile))
+        buildstatus = building.BuildStatus(index, heightfile, state)
+        with click.progressbar(build_actions, bar_template=PROGRESS_BAR_TEMPLATE) as bar:
+            for action in bar:
+                action(buildstatus, debug)
+        for line in str(buildstatus).split('\n'):
+            info(line)
+        outfiles.extend(buildstatus.result_files)
+    
+    info('Building package...')
+    building.package(output, outfiles)
+    if clean:
+        info('Cleaning up...')
+        building.cleanup()
+    else:
+        info('Not cleaning temporary build files')
+    success('BUILD SUCCESSFUL!')
         
-        for line in state.height_files:
-            
-            subprocess.call('gdalwarp -te {} {} {} {} {} {}.bil'.format(state.window['ulx'], state.window['uly'], state.window['lrx'], state.window['lry'],line, line + 'output'))
-            subprocess.call('gdalwarp -t_srs EPSG:3857 -r bilinear {0} {0}output2.bil'.format(line))
-            subprocess.call('gdal_translate -of ENVI {0} {0}output3.bil'.format(line))
-                       
-            #VAIHEESSA
-            # gdalwarp -te 1 1 5 5 -t_srs EPSG:3857 -r bilinear n36w113.img output200.img on myös mahdollista
-            
-           
-    # TODO: Use GDAL etc. to do the actual conversion
 
 
 @click.command()
