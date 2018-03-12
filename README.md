@@ -15,3 +15,4 @@ to install. After that, try
 ```
 mapcreator hello
 ```
+If you wan't to build files, you need to install GDAL.
