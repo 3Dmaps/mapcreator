@@ -1,4 +1,5 @@
 import click
+from mapcreator import building
 from mapcreator import persistence
 from mapcreator import echoes
 
@@ -43,4 +44,22 @@ def clear_or_error():
         echoes.error('Unable to reset project: {}'.format(e))
         return False
     else:
+        return True
+
+def build_init_or_error():
+    try:
+        building.init_build()
+    except Exception as e:
+        echoes.error('Unable to initialize build: {}'.format(e))
+        return False
+    else:
+        return True
+
+def build_clean_or_error():
+    try:
+        building.cleanup()
+    except Exception as e:
+        echoes.error('Unable to clean temporary build files: {}'.format(e))
+        return False
+    else: 
         return True

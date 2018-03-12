@@ -54,8 +54,8 @@ def call_command(command, buildstatus, debug = False):
 
 
 def init_build():
-    if path.exists(BUILD_DIR):
-        shutil.rmtree(BUILD_DIR)
+    if temp_build_files_exist():
+        cleanup()
     makedirs(BUILD_DIR)
     makedirs(FINALIZED_DIR)
 
@@ -108,6 +108,8 @@ def translate(buildstatus, debug = False):
 
 
 def finalize(buildstatus, debug = False):
+    if buildstatus.current_file == buildstatus.original_file:
+        raise RuntimeError('No actions have been done --> Not finalizing anything')
     final_filename = FINAL_FILENAME_FORMAT.format(buildstatus.index)
     final_path = path.join(FINALIZED_DIR, final_filename)
     rename(buildstatus.current_file, final_path)
@@ -118,6 +120,9 @@ def package(package_name, files):
     with ZipFile(package_name, 'w', ZIP_DEFLATED) as package:
         for f in files:
             package.write(f, path.basename(f))
+
+def temp_build_files_exist():
+    return path.exists(BUILD_DIR)
 
 def cleanup():
     shutil.rmtree(BUILD_DIR)

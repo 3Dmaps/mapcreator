@@ -97,14 +97,25 @@ def set_window(ulx, uly, lrx, lry):
         success('Window set to {} -> {}'.format((ulx, uly), (lrx, lry)))
 
 @click.command()
-@click.option('--output', '-o', default='3dmapdata.zip', help='Output file name')
+@click.option('--output', '-o', default='3dmapdata.zip', help='Output file name. Default: 3dmapdata.zip')
+@click.option('--force', '-f', is_flag=True, help='Build even if output file already exists')
 @click.option('--debug', '-d', is_flag=True, help='Causes debug information to be printed during the build')
 @click.option('--clean/--no-clean', default=True, help='Specifies whether to clean temporary build files after building')
-def build(output, debug, clean):
+def build(output, force, debug, clean):
+    """
+    Builds the project.
+    Transforms and translates all output files to format used by the 3DMaps-application and packages them for easy transportation.
+    """
 
     build_actions = (
         building.prepare, building.cut_projection_window, building.reproject, building.translate, building.finalize
     )
+
+    if path.exists(output) and not force:
+        error('File {} already exists!'.format(output))
+        info('If you wish to build and overwrite this file, do:')
+        info('mapcreator build --force')
+        return
 
     if not persistence.state_exists(): 
         warn('No project found in current working directory.')
@@ -115,30 +126,56 @@ def build(output, debug, clean):
         error('No height files have been added to the current project! There\'s nothing to build!')
         return
     
-    highlight('STARTING BUILD')
+    if not build_init_or_error(): return
 
-    building.init_build()
+    highlight('STARTING BUILD')
+    info('Output file is {}'.format(output))
+
     outfiles = []
+    has_errors = False
     for index, heightfile in enumerate(state.height_files):
         info('Processing {}...'.format(heightfile))
         buildstatus = building.BuildStatus(index, heightfile, state)
-        with click.progressbar(build_actions, bar_template=PROGRESS_BAR_TEMPLATE) as bar:
+        errors = []
+        with click.progressbar(build_actions, bar_template=PROGRESS_BAR_TEMPLATE, show_eta=False) as bar:
             for action in bar:
-                action(buildstatus, debug)
+                try:
+                    action(buildstatus, debug)
+                except Exception as e:
+                    errors.append(e)
+                    has_errors = True
+        if errors:
+            error('Exceptions caught when processing {}:'.format(heightfile))
+            for e in errors:
+                error(e)
         for line in str(buildstatus).split('\n'):
             info(line)
         outfiles.extend(buildstatus.result_files)
     
     info('Building package...')
-    building.package(output, outfiles)
+    try:
+        building.package(output, outfiles)
+    except Exception as e:
+        error('Unable to create package: {}'.format(e))
     if clean:
         info('Cleaning up...')
-        building.cleanup()
+        build_clean_or_error()
     else:
         info('Not cleaning temporary build files')
-    success('BUILD SUCCESSFUL!')
-        
+    if has_errors:
+        warn('Build done (but there were errors)')
+    else:
+        success('BUILD SUCCESSFUL!')
 
+@click.command()
+def clean_temp_files():
+    """Cleans up temporary build files"""
+    if not building.temp_build_files_exist():
+        info('No temporary build files to clean up.')
+        return
+    info('Cleaning up temporary build files...')
+    if build_clean_or_error():
+        success('Cleaned up!')
 
 @click.command()
 def status():
@@ -169,3 +206,4 @@ cli.add_command(set_window)
 cli.add_command(status)
 cli.add_command(reset)
 cli.add_command(build)
+cli.add_command(clean_temp_files)
