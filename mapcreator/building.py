@@ -16,6 +16,7 @@ INTERNAL_FORMAT = 'GTiff'
 INTERNAL_FILE_EXTENSION = 'tiff'
 
 PROJECTION_IDENTIFIER = 'EPSG:3857'
+OUTPUT_CELLSIZE = 10
 
 OUTPUT_FORMAT = 'ENVI'
 OUTPUT_FILE_EXTENSION = 'bin'
@@ -88,7 +89,7 @@ def cut_projection_window(buildstatus, debug = False):
 
 def reproject(buildstatus, debug = False):
     outpath = get_output_path(buildstatus.current_file)
-    command = 'gdalwarp -t_srs {} -r bilinear {} {}'.format(PROJECTION_IDENTIFIER, buildstatus.current_file, outpath)
+    command = 'gdalwarp -tr {} {} -t_srs {} -r bilinear {} {}'.format(OUTPUT_CELLSIZE, OUTPUT_CELLSIZE, PROJECTION_IDENTIFIER, buildstatus.current_file, outpath)
     call_command(command, buildstatus, debug)
     buildstatus.current_file = outpath
 

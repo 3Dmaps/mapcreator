@@ -45,7 +45,7 @@ class State:
 
     def get_window_string(self):
         if not self.has_window(): return ''
-        return '{0[0]} {0[1]} {1[0]} {1[1]}'.format(self.get_window_upper_left(), self.get_window_lower_right())
+        return '{0[0]} {1[1]} {1[0]} {0[1]}'.format(self.get_window_upper_left(), self.get_window_lower_right())
 
     @staticmethod
     def from_dict(d):
