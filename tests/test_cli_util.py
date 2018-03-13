@@ -74,7 +74,31 @@ class TestCliUtil:
     @patch('mapcreator.persistence.clear_state', return_value = True)
     def test_clear_or_error_doesnt_show_error_when_successful(self, mock_clear, mock_error):
         self.x_or_error_no_error(cli_util.clear_or_error, mock_clear, mock_error, True)
+    
+    @patch('mapcreator.building.init_build', side_effect=OSError('Whoops!'))
+    def test_build_init_or_error_shows_error_when_unsuccessful(self, mock_init, mock_error):
+        self.x_or_error_shows_error(
+            cli_util.build_init_or_error,
+            mock_init,
+            mock_error,
+            ['Unable to initialize build', str(OSError('Whoops!'))]
+        )
+    
+    @patch('mapcreator.building.init_build')
+    def test_build_init_or_error_doesnt_show_error_when_successful(self, mock_init, mock_error):
+        self.x_or_error_no_error(cli_util.build_init_or_error, mock_init, mock_error, True)
 
-
+    @patch('mapcreator.building.cleanup', side_effect=OSError('Whoops!'))
+    def test_build_clean_or_error_shows_error_when_unsuccessful(self, mock_clean, mock_error):
+        self.x_or_error_shows_error(
+            cli_util.build_clean_or_error,
+            mock_clean,
+            mock_error,
+            ['Unable to clean', str(OSError('Whoops!'))]
+        )
+    
+    @patch('mapcreator.building.cleanup')
+    def test_build_clean_or_error_doesnt_show_error_when_successful(self, mock_clean, mock_error):
+        self.x_or_error_no_error(cli_util.build_clean_or_error, mock_clean, mock_error, True)
     
     

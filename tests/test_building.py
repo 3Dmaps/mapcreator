@@ -1,5 +1,6 @@
 import mock
 import shutil
+import subprocess
 from os import path
 from mapcreator import building
 from mapcreator.building import BuildStatus
@@ -9,6 +10,26 @@ from test_persistence import DummyState
 def setup_module(module):
     building.BUILD_DIR = '.test_mapcreator_build'
     building.FINALIZED_DIR = path.join(building.BUILD_DIR, 'finalized')
+
+@mock.patch('subprocess.Popen')
+def test_call_command_with_debug(mock_popen):
+    status = BuildStatus(0, 'test.txt', DummyState())
+    mock_popen.return_value.__enter__.return_value.communicate.return_value = (b'test output', b'test error')
+    building.call_command('mycommand -abc', status, True)
+    mock_popen.assert_called_once_with('mycommand -abc', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert 'mycommand' in str(status)
+    assert 'test output' in str(status)
+    assert 'test error' in str(status)
+
+@mock.patch('subprocess.Popen')
+def test_call_command_no_debug(mock_popen):
+    status = BuildStatus(0, 'test.txt', DummyState())
+    mock_popen.return_value.__enter__.return_value.communicate.return_value = (b'test output', b'test error')
+    building.call_command('mycommand --do-test -- -1 2 3', status, False)
+    mock_popen.assert_called_once_with('mycommand --do-test -- -1 2 3', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert 'mycommand' not in str(status)
+    assert 'test output' not in str(status)
+    assert 'test error' in str(status)
 
 def test_init_build():
     building.init_build()
