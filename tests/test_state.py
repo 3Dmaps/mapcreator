@@ -48,4 +48,28 @@ def test_from_dict():
     assert (1, 2) == state.get_window_upper_left()
     assert (3, 4) == state.get_window_lower_right()
 
+@patch('os.path.exists', lambda x: True)
+def test_has_height_files():
+    state = State()
+    assert not state.has_height_files()
+    state.add_height_file('asd')
+    assert state.has_height_files()
+
+def test_has_window():
+    state = State()
+    assert not state.has_window()
+    state.set_window(1, 2, 3, 4)
+    assert state.has_window()
+
+def test_window_string():
+    state = State()
+    assert state.get_window_string() == ''
+    state.set_window(-1, 2, -3, 4)
+    nums = list(map(int, state.get_window_string().split(' ')))
+    assert len(nums) == 4
+    assert nums[0] == -1
+    assert nums[1] == 2
+    assert nums[2] == -3
+    assert nums[3] == 4
+
     
