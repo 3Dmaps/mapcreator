@@ -1,6 +1,7 @@
 import click
 
 IDENTIFIER_SIZE = 7
+PROGRESS_BAR_TEMPLATE = (' ' * (IDENTIFIER_SIZE + 1)) + '%(label)s [%(bar)s] %(info)s'
 
 def format_echo(identifier, s):
     if identifier:

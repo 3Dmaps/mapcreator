@@ -11,6 +11,9 @@ class State:
     def __init__(self):
         self.height_files = []
     
+    def has_height_files(self):
+        return hasattr(self, 'height_files') and len(self.height_files) > 0
+
     def add_height_file(self, fpath):
         truepath = path.abspath(fpath)
         if not path.exists(truepath):
@@ -21,6 +24,9 @@ class State:
             self.height_files.append(truepath)
             return FileAddResult.SUCCESS
     
+    def has_window(self):
+        return hasattr(self, 'window')
+
     def set_window(self, ulx, uly, lrx, lry):
         self.window = {
             'ulx': ulx,
@@ -30,10 +36,20 @@ class State:
         }
     
     def get_window_upper_left(self):
+        if not self.has_window(): return None
         return (self.window['ulx'], self.window['uly'])
     
     def get_window_lower_right(self):
+        if not self.has_window(): return None
         return (self.window['lrx'], self.window['lry'])
+
+    def get_window_string(self):
+        if not self.has_window(): return ''
+        return '{0[0]} {0[1]} {1[0]} {1[1]}'.format(self.get_window_upper_left(), self.get_window_lower_right())
+    
+    def get_window_string_lowerleft_topright(self):
+        if not self.has_window(): return ''
+        return '{0[0]} {1[1]} {1[0]} {0[1]}'.format(self.get_window_upper_left(), self.get_window_lower_right())
 
     @staticmethod
     def from_dict(d):
@@ -46,13 +62,13 @@ class State:
     
     def __str__(self):
         lines = []
-        if hasattr(self, 'height_files') and len(self.height_files) > 0:
+        if self.has_height_files():
             lines.append('-Height files:')
             for fpath in self.height_files:
                 lines.append('--{}'.format(fpath))
         else:
             lines.append('-No height files added.')
-        if hasattr(self, 'window'):
+        if self.has_window():
             lines.append('-Window:')
             lines.append('--Upper left corner:  x={0[0]}, y={0[1]}'.format(self.get_window_upper_left()))
             lines.append('--Lower right corner: x={0[0]}, y={0[1]}'.format(self.get_window_lower_right()))
