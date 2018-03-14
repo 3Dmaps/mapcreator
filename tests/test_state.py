@@ -64,12 +64,12 @@ def test_has_window():
 def test_window_string():
     state = State()
     assert state.get_window_string() == ''
-    state.set_window(-1, 2, -3, 4)
+    state.set_window(-1, 4, 1, 2)
     nums = list(map(int, state.get_window_string().split(' ')))
     assert len(nums) == 4
     assert nums[0] == -1
-    assert nums[1] == 2
-    assert nums[2] == -3
-    assert nums[3] == 4
+    assert nums[1] == 4
+    assert nums[2] == 1
+    assert nums[3] == 2
 
     

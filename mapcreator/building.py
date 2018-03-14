@@ -83,7 +83,7 @@ def prepare(buildstatus, debug = False):
 def cut_projection_window(buildstatus, debug = False):
     if buildstatus.state.has_window():
         outpath = get_output_path(buildstatus.current_file)
-        command = 'gdalwarp -te {} {} {}'.format(buildstatus.state.get_window_string(), buildstatus.current_file, outpath)
+        command = 'gdalwarp -te {} {} {}'.format(buildstatus.state.get_window_string_lowerleft_topright(), buildstatus.current_file, outpath)
         call_command(command, buildstatus, debug)
         buildstatus.current_file = outpath
 

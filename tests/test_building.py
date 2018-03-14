@@ -78,7 +78,7 @@ def test_cut_projection_window(mock_call):
     state.set_window(1, 2, 3, 4)
     status = BuildStatus(0, 'test.txt', state)
     building.cut_projection_window(status)
-    expected_command = 'gdalwarp -te 1 2 3 4 test.txt {}'.format(building.get_output_path('test.txt'))
+    expected_command = 'gdalwarp -te 1 4 3 2 test.txt {}'.format(building.get_output_path('test.txt'))
     mock_call.assert_called_once_with(expected_command, status, False)
     assert status.current_file == building.get_output_path('test.txt')
 
@@ -93,7 +93,7 @@ def test_cut_projection_window_when_no_window(mock_call):
 def test_reproject(mock_call):
     status = BuildStatus(0, 'test.txt', DummyState())
     building.reproject(status)
-    expected_command = 'gdalwarp -t_srs EPSG:3857 -r bilinear test.txt {}'.format(building.get_output_path('test.txt'))
+    expected_command = 'gdalwarp -tr 10 10 -t_srs EPSG:3857 -r bilinear test.txt {}'.format(building.get_output_path('test.txt'))
     mock_call.assert_called_once_with(expected_command, status, False)
     assert status.current_file == building.get_output_path('test.txt')
 
