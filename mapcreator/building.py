@@ -127,3 +127,7 @@ def temp_build_files_exist():
 
 def cleanup():
     shutil.rmtree(BUILD_DIR)
+
+BUILD_ACTIONS = (
+    prepare, cut_projection_window, reproject, translate, finalize
+)

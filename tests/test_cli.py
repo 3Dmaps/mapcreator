@@ -129,6 +129,123 @@ def test_set_window(mock_save, mock_state):
     assert result.exit_code == 0
     assert 'SUCCESS: Window set to' in result.output
 
+@patch('os.path.exists', lambda s: True)
+@patch('mapcreator.building.init_build', side_effect = RuntimeError('Shouldn\'t have run this!'))
+def test_build_does_nothing_if_target_exists_and_not_force(mock_init):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['build', '-o', 'test.zip'])
+    assert result.exit_code == 0
+    assert 'File test.zip already exists' in result.output
+    assert 'STARTING BUILD' not in result.output
+    mock_init.assert_not_called()
+
+@patch('os.path.exists', lambda s: False)
+@patch('mapcreator.persistence.state_exists', lambda: False)
+@patch('mapcreator.building.init_build', side_effect = RuntimeError('Shouldn\'t have run this!'))
+def test_build_does_nothing_if_state_doesnt_exist(mock_init):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['build'])
+    assert result.exit_code == 0
+    assert 'No project found' in result.output
+    assert 'STARTING BUILD' not in result.output
+    mock_init.assert_not_called()
+
+@patch('os.path.exists', lambda s: False)
+@patch('mapcreator.persistence.state_exists', lambda: True)
+@patch('mapcreator.persistence.load_state', side_effect = OSError('Whoops!'))
+@patch('mapcreator.building.init_build', side_effect = RuntimeError('Shouldn\'t have run this!'))
+def test_build_does_nothing_if_state_fails_load(mock_init, mock_load):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['build'])
+    assert result.exit_code == 0
+    assert 'ERROR' in result.output
+    assert 'STARTING BUILD' not in result.output
+    mock_init.assert_not_called()
+
+@patch('os.path.exists', lambda s: False)
+@patch('mapcreator.persistence.state_exists', lambda: True)
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch('mapcreator.building.init_build', side_effect = RuntimeError('Shouldn\'t have run this!'))
+def test_build_does_nothing_if_state_has_no_height_files(mock_init):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['build'])
+    assert result.exit_code == 0
+    assert 'No height files' in result.output
+    assert 'STARTING BUILD' not in result.output
+    mock_init.assert_not_called()
+
+@patch('os.path.exists', lambda s: False)
+@patch('mapcreator.persistence.state_exists', lambda: True)
+@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b']}))
+@patch('mapcreator.building.init_build', side_effect = OSError('Shouldn\'t have run this!'))
+def test_build_does_nothing_if_init_fails(mock_init):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['build'])
+    assert result.exit_code == 0
+    assert 'ERROR' in result.output
+    assert 'STARTING BUILD' not in result.output
+    mock_init.assert_called_once_with()
+
+@patch('os.path.exists', lambda s: False)
+@patch('mapcreator.persistence.state_exists', lambda: True)
+@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b', 'c']}))
+@patch('mapcreator.building.init_build', lambda: True)
+@patch('mapcreator.building.cleanup', lambda: True)
+@patch('mapcreator.building.package')
+def test_build_works_correctly(mock_package):
+    def check_action_a(status, debug):
+        assert status.index in range(3)
+        assert debug
+        status.current_file = status.current_file * 2
+    def check_action_b(status, debug):
+        file_to_index = {
+            'aa': 0,
+            'bb': 1,
+            'cc': 2,
+        }
+        assert file_to_index[status.current_file] == status.index
+        status.add_result_file(status.current_file)
+        status.add_result_file(status.current_file + '1')
+    mapcreator.building.BUILD_ACTIONS = (check_action_a, check_action_b)
+    runner = CliRunner()
+    result = runner.invoke(cli, ['build', '-do', 'test2.zip'])
+    assert result.exit_code == 0
+    assert 'SUCCESS' in result.output
+    mock_package.assert_called_once_with('test2.zip', ['aa', 'aa1', 'bb', 'bb1', 'cc', 'cc1'])
+
+@patch('os.path.exists', lambda s: True)
+@patch('mapcreator.persistence.state_exists', lambda: True)
+@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b', 'c']}))
+@patch('mapcreator.building.init_build', lambda: True)
+@patch('mapcreator.building.cleanup', lambda: True)
+@patch('mapcreator.building.package')
+def test_build_throws_errors_correctly(mock_package):
+    def check_action_a(status, debug):
+        assert status.index in range(3)
+        assert not debug
+        status.current_file = status.current_file * 2
+    def check_action_b(status, debug):
+        file_to_index = {
+            'aa': 0,
+            'bb': 1,
+            'cc': 2,
+        }
+        if status.current_file == 'bb':
+            raise ValueError('Oh no!')
+        if status.current_file == 'cc':
+            status.output.write('Hecking cool')
+        assert file_to_index[status.current_file] == status.index
+        status.add_result_file(status.current_file)
+        status.add_result_file(status.current_file + '1')
+    mapcreator.building.BUILD_ACTIONS = (check_action_a, check_action_b)
+    runner = CliRunner()
+    result = runner.invoke(cli, ['build', '-fo', 'test2.zip'])
+    assert result.exit_code == 0
+    assert str(ValueError('Oh no!')) in result.output
+    assert 'Hecking cool' in result.output
+    assert 'Build done (but there were errors)' in result.output
+    assert 'SUCCESS' not in result.output
+    mock_package.assert_called_once_with('test2.zip', ['aa', 'aa1', 'cc', 'cc1'])
 
 @patch('mapcreator.persistence.state_exists', lambda: True)
 @patch('mapcreator.persistence.clear_state')

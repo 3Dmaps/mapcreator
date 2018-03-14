@@ -107,10 +107,6 @@ def build(output, force, debug, clean):
     Transforms and translates all output files to format used by the 3DMaps-application and packages them for easy transportation.
     """
 
-    build_actions = (
-        building.prepare, building.cut_projection_window, building.reproject, building.translate, building.finalize
-    )
-
     if path.exists(output) and not force:
         error('File {} already exists!'.format(output))
         info('If you wish to build and overwrite this file, do:')
@@ -137,7 +133,7 @@ def build(output, force, debug, clean):
         info('Processing {}...'.format(heightfile))
         buildstatus = building.BuildStatus(index, heightfile, state)
         errors = []
-        with click.progressbar(build_actions, bar_template=PROGRESS_BAR_TEMPLATE, show_eta=False) as bar:
+        with click.progressbar(building.BUILD_ACTIONS, bar_template=PROGRESS_BAR_TEMPLATE, show_eta=False) as bar:
             for action in bar:
                 try:
                     action(buildstatus, debug)
@@ -157,9 +153,11 @@ def build(output, force, debug, clean):
         building.package(output, outfiles)
     except Exception as e:
         error('Unable to create package: {}'.format(e))
+        has_errors = True
     if clean:
         info('Cleaning up...')
-        build_clean_or_error()
+        if not build_clean_or_error():
+            has_errors = True
     else:
         info('Not cleaning temporary build files')
     if has_errors:
