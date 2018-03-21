@@ -37,6 +37,7 @@
   <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="119" lat="36.1057122" lon="-112.0359378" />
   <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="120" lat="36.1082665" lon="-112.0233688" />
   <node timestamp="2017-11-23T15:46:19Z" uid="1" user="random" visible="true" version="1" changeset="1" id="121" lat="36.1082433" lon="-112.0910089" />
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="123" lat="36.1082665" lon="-112.0233688" />
   <way timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="200">
     <nd ref="111" />
     <nd ref="112" />

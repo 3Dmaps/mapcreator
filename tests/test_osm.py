@@ -12,7 +12,7 @@ def setup_function(function):
 
 def test_osmdata():
     def node_filter_a(element, data):
-        return element.get('name') == 'zmeu'
+        return element.get('user') == 'zmeu'
     def node_filter_b(element, data):
         for tag in element:
             if tag.get('k') == 'zmeuicon':

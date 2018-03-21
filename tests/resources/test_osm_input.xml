@@ -40,6 +40,7 @@
   <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="120" lat="36.1082665" lon="-112.0233688" />
   <node timestamp="2017-11-23T15:46:19Z" uid="1" user="random" visible="true" version="1" changeset="1" id="121" lat="36.1082433" lon="-112.0910089" />
   <node timestamp="2017-11-23T15:46:19Z" uid="1" user="random" visible="true" version="1" changeset="1" id="122" lat="36.1079436" lon="-112.0683897" />
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="123" lat="36.1082665" lon="-112.0233688" />
   <way timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="200">
     <nd ref="111" />
     <nd ref="112" />
