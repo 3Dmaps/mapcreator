@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<osm xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" version="0.6">
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="111" lat="35.9432567" lon="-112.1851486">
+    <tag k="ele" v="2007.46655273438" />
+    <tag k="name" v="Apex" />
+    <tag k="is_in" v="Coconino,Arizona,Ariz.,AZ,USA" />
+    <tag k="place" v="hamlet" />
+    <tag k="gnis:id" v="25248" />
+    <tag k="gnis:Class" v="Populated Place" />
+    <tag k="gnis:County" v="Coconino" />
+    <tag k="gnis:ST_num" v="04" />
+    <tag k="import_uuid" v="bb7269ee-502a-5391-8056-e3ce0e66489c" />
+    <tag k="gnis:ST_alpha" v="AZ" />
+    <tag k="gnis:County_num" v="005" />
+    <tag k="EXPORT_POI" v="true" />
+    <tag k="zmeuicon" v="city" />
+  </node>
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="not_zmeu" visible="true" version="1" changeset="1" id="999" lat="36.2301946" lon="-111.9738232">
+    <tag k="ele" v="2595.87329101562" />
+    <tag k="name" v="Vista Encantada" />
+    <tag k="gnis:id" v="24675" />
+    <tag k="tourism" v="viewpoint" />
+    <tag k="gnis:Class" v="Populated Place" />
+    <tag k="gnis:County" v="Coconino" />
+    <tag k="gnis:ST_num" v="04" />
+    <tag k="import_uuid" v="bb7269ee-502a-5391-8056-e3ce0e66489c" />
+    <tag k="gnis:ST_alpha" v="AZ" />
+    <tag k="gnis:County_num" v="005" />
+    <tag k="EXPORT_POI" v="true" />
+    <tag k="zmeuicon" v="viewpoint" />
+  </node>
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="112" lat="36.0176913" lon="-112.1253312" />
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="113" lat="36.0537344" lon="-112.1439038" />
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="not_zmeu" visible="true" version="1" changeset="1" id="114" lat="36.0537344" lon="-112.1439038" />
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="117" lat="36.1011288" lon="-112.0608877" />
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="118" lat="36.104251" lon="-112.0378661" />
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="119" lat="36.1057122" lon="-112.0359378" />
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="120" lat="36.1082665" lon="-112.0233688" />
+  <node timestamp="2017-11-23T15:46:19Z" uid="1" user="random" visible="true" version="1" changeset="1" id="121" lat="36.1082433" lon="-112.0910089" />
+  <way timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="200">
+    <nd ref="111" />
+    <nd ref="112" />
+    <nd ref="113" />
+    <nd ref="114" />
+    <tag k="name" v="Powell Point Trail" />
+    <tag k="highway" v="footway" />
+    <tag k="EXPORT_ROUTE" v="false" />
+    <tag k="zmeucolor" v="yellow" />
+    <tag k="zmeuname" v="Powell Point Trail" />
+    <tag k="intermediate_points" v="1856359973,Powell Point,IntermediatePoint_TRAILHEAD,,1856359973,Powell Point,IntermediatePoint_TRAILHEAD,,1856359961,Powell Point,IntermediatePoint_TRAILHEAD," />
+  </way>
+  <way timestamp="2017-11-23T15:46:19Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="128437048">
+    <nd ref="117" />
+    <nd ref="118" />
+    <nd ref="119" />
+    <tag k="foot" v="designated" />
+    <tag k="highway" v="path" />
+    <tag k="lit" v="no" />
+    <tag k="name" v="Cape Royal Trail" />
+    <tag k="EXPORT_ROUTE" v="true" />
+    <tag k="zmeucolor" v="violet" />
+    <tag k="zmeuname" v="Cape Royal Trail" />
+    <tag k="intermediate_points" v="1419410942,Trailhead,IntermediatePoint_TRAILHEAD,,1414803509,Cape Royal,IntermediatePoint_TRAILHEAD," />
+  </way>
+  <way timestamp="2017-11-23T15:46:36Z" uid="1" user="zmeu" visible="true" version="1" changeset="1" id="100000000096">
+    <nd ref="120" />
+    <nd ref="121" />
+    <tag k="highway" v="footway" />
+    <tag k="source" v="Steiner tree path" />
+    <tag k="EXPORT_ROUTE" v="false" />
+    <tag k="zmeucolor" v="yellow" />
+  </way>
+</osm>

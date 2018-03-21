@@ -57,65 +57,27 @@ def test_add_zero_height_files(mock_save):
     assert result.exit_code == 0
     assert 'No files were specified.' in result.output
 
-@patch('mapcreator.persistence.load_state', lambda: State())
-@patch.object(mapcreator.state.State, 'add_height_file')
-@patch('mapcreator.persistence.save_state', side_effect = lambda state: state) #Returns state, so save was successful
-def test_add_height_files(mock_save, mock_state):
-    mock_state.return_value = FileAddResult.SUCCESS
+@patch('mapcreator.cli.add_files')
+def test_add_height_files(mock_add):
     runner = CliRunner()
-    result = runner.invoke(cli, ['add_height_files','test1.txt','test2.txt'])
-    mock_state.assert_any_call('test1.txt')
-    mock_state.assert_any_call('test2.txt')
-    assert mock_state.call_count == 2
-    assert mock_save.call_count == 1
+    result = runner.invoke(cli, ['add_height_files', 'test1.txt', 'test2.txt'])
+    mock_add.assert_called_once_with(('test1.txt', 'test2.txt'), 'add_height_file')
     assert result.exit_code == 0
-    assert 'SUCCESS' in result.output
 
-@patch('mapcreator.persistence.load_state', lambda: State())
-@patch.object(mapcreator.state.State, 'add_height_file')
 @patch('mapcreator.persistence.save_state')
-def test_add_height_files_no_files_exist(mock_save, mock_state):
-    mock_state.return_value = FileAddResult.DOESNT_EXIST
+def test_add_zero_osm_files(mock_save):
     runner = CliRunner()
-    result = runner.invoke(cli, ['add_height_files','test1.txt','test2.txt','test3.txt'])
-    mock_state.assert_any_call('test1.txt')
-    mock_state.assert_any_call('test2.txt')
-    mock_state.assert_any_call('test3.txt')
-    assert mock_state.call_count == 3
-    assert mock_save.call_count == 0 # Don't save if there's no changes
-    for i in range(1,3):
-        assert 'File "test{}.txt" doesn\'t exist'.format(i) in result.output
-
-@patch('mapcreator.persistence.load_state', lambda: State())
-@patch.object(mapcreator.state.State, 'add_height_file')
-@patch('mapcreator.persistence.save_state')
-def test_add_height_files_all_already_added(mock_save, mock_state):
-    mock_state.return_value = FileAddResult.ALREADY_ADDED
-    runner = CliRunner()
-    result = runner.invoke(cli, ['add_height_files','test3.txt'])
-    mock_state.assert_called_once_with('test3.txt')
-    assert mock_save.call_count == 0
-    assert 'test3.txt has already been added to this project' in result.output
-
-@patch('mapcreator.persistence.load_state', lambda: State())
-@patch.object(mapcreator.state.State, 'add_height_file')
-@patch('mapcreator.persistence.save_state')
-def test_add_height_files_some_files_ok(mock_save, mock_state):
-    def add_side_effect(filename):
-        if filename in ('1', '11', '21'):
-            return FileAddResult.SUCCESS
-        else:
-            return (FileAddResult.ALREADY_ADDED, FileAddResult.DOESNT_EXIST)[int(filename) % 2]
-    mock_state.side_effect = add_side_effect
-    runner = CliRunner()
-    runner_args = ['add_height_files']
-    for i in range(25):
-        runner_args.append(str(i))
-    result = runner.invoke(cli, runner_args)
-    assert mock_state.call_count == len(runner_args) - 1
-    assert mock_save.call_count == 1
+    result = runner.invoke(cli, ['add_osm_files'])
+    mock_save.assert_not_called()
     assert result.exit_code == 0
-    assert '3 files (out of 25) added to the project successfully' in result.output
+    assert 'No files were specified.' in result.output
+
+@patch('mapcreator.cli.add_files')
+def test_add_osm_files(mock_add):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['add_osm_files', 'test1.xml', 'test2.xml'])
+    mock_add.assert_called_once_with(('test1.xml', 'test2.xml'), 'add_osm_file')
+    assert result.exit_code == 0
 
 @patch('mapcreator.persistence.load_state', lambda: State())
 @patch.object(mapcreator.state.State, 'set_window')

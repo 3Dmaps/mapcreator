@@ -10,6 +10,10 @@ class OSMData:
     ATTRIB_ID = 'id'
     ATTRIB_REF = 'ref'
 
+    def __init__(self):
+        self.node_filters = []
+        self.way_filters = []
+
     @classmethod
     def load(cls, path):
         data = OSMData()
@@ -39,53 +43,96 @@ class OSMData:
                 self.ways[wayid] = child
                 self.included_ways.add(wayid)
 
-    def and_filter_ways(self, *filters):
-        OSMData.and_filter(self.included_ways, self.ways, *filters)
+    def add_node_filter(self, *filters):
+        """
+        Adds filters. 
+        Filters are functions that take a ElementTree element and this OSMData instance
+        as arguments and returns a truthful value if said element should be
+        kept.
+        Filters given in the same method call are joined with "and",
+        while filters given in subsequent calls are joined with "or".
+        For example
 
-    def or_filter_ways(self, *filters):
-        OSMData.or_filter(self.included_ways, self.ways, *filters)
+        data = OSMData()
+        data.add_node_filter(f1, f2, f3)
+        data.add_node_filter(f4)
 
-    def and_filter_nodes(self, *filters):
-        OSMData.and_filter(self.included_nodes, self.nodes, *filters)
+        will result in elements for which
+        
+        (f1(element) and f2(element) and f3(element)) or f4(element)
 
-    def or_filter_nodes(self, *filters):
-        OSMData.or_filter(self.included_nodes, self.nodes, *filters)
+        is False getting filtered out and elements for which that is True being kept
+        """
+        OSMData.add_filter(self.node_filters, *filters)
+    
+    def add_way_filter(self, *filters):
+        """
+        Adds filters.
+        Filters are functions that take a ElementTree element and this OSMData instance
+        as arguments and returns a truthful value if said element should be
+        kept.
+        Filters given in the same method call are joined with "and",
+        while filters given in subsequent calls are joined with "or".
+        For example
 
+        data = OSMData()
+        data.add_way_filter(f1, f2, f3)
+        data.add_way_filter(f4)
+
+        will result in elements for which
+        
+        (f1(element) and f2(element) and f3(element)) or f4(element)
+
+        is False getting filtered out and elements for which that is True being kept
+        """
+        OSMData.add_filter(self.way_filters, *filters)
+    
     @classmethod
-    def and_filter(cls, idset, elemdict, *filters):
-        for elemid in idset:
-            elem = elemdict[elemid]
-            for f in filters:
-                if not f(elem):
-                    idset.remove(elemid)
-                    break
+    def add_filter(cls, filterlist, *filters):
+        filterlist.append(filters)
 
-    @classmethod
-    def or_filter(cls, idset, elemdict, *filters):
+    def do_filter(self):
+        self.filter(self.included_nodes, self.nodes, self.node_filters)
+        self.filter(self.included_ways, self.ways, self.way_filters)
+
+    def filter(self, idset, elemdict, filterlist):
+        filterset = set()
         for elemid in idset:
             elem = elemdict[elemid]
             ok = False
-            for f in filters:
-                if f(elem):
+            for filt in filterlist:
+                current_ok = True
+                for f in filt:
+                    if not f(elem, self):
+                        current_ok = False
+                        break
+                if current_ok:
                     ok = True
                     break
             if not ok:
-                idset.remove(elemid)
+                filterset.add(elemid)
+        idset -= filterset
+
 
     def prepare_for_save(self):
+        root = self.tree.getroot()
         for way in self.ways.values():
             wayid = OSMData.get_elem_id(way)
+            # Remove dropped ways
             if wayid not in self.included_ways:
-                way.remove()
+                root.remove(way)
             else:
                 for child in way:
+                    # Add nodes that belong to the way even if they were dropped by some other filter
                     if child.tag == OSMData.TAG_WAY_NODE:
                         self.included_nodes.add(int(child.get(OSMData.ATTRIB_REF)))
         for node in self.nodes.values():
             nodeid = OSMData.get_elem_id(node)
+            # Remove dropped nodes
             if nodeid not in self.included_nodes:
-                node.remove()
+                root.remove(node)
 
     def save(self, path):
+        self.do_filter()
         self.prepare_for_save()
-        self.tree.write(path)
+        self.tree.write(path, encoding='utf-8', xml_declaration=True)
