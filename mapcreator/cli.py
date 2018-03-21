@@ -50,29 +50,17 @@ def add_height_files(files):
         warn('No files were specified.')
         info('Try mapcreator add_height_files [file 1] [file 2] ... [file n]')
         return
-    state = load_or_error()
-    if not state: return
-    info('Adding files to project...')
-    count = 0
-    for fpath in files:
-        result = state.add_height_file(fpath)
-        if result == FileAddResult.DOESNT_EXIST:
-            error('File "{}" doesn\'t exist!'.format(fpath))
-        elif result == FileAddResult.ALREADY_ADDED:
-            warn('{} has already been added to this project'.format(fpath))
-        elif result == FileAddResult.SUCCESS:
-            info('"{}" added'.format(fpath))
-            count += 1
-        else:
-            error('Unrecognized FileAddResult {} when trying to add {}!'.format(result, fpath))
-    if count > 0:
-        if not save_or_error(state): return
-        if count == len(files):
-            success("{} files added to the project successfully!".format(len(files)))
-        else:
-            warn("{} files (out of {}) added to the project successfully".format(count, len(files)))
-    else:
-        warn('No files were added.')
+    add_files(files, 'add_height_file')
+
+@click.command()
+@click.argument('files', nargs=-1)
+def add_osm_files(files):
+    """Adds open street map files to the project"""
+    if len(files) == 0:
+        warn('No files were specified.')
+        info('Try mapcreator add_osm_files [file 1] [file 2] ... [file n]')
+        return
+    add_files(files, 'add_osm_file')
 
 @click.command()
 @click.argument('ulx', type=float)
@@ -200,6 +188,7 @@ def reset():
 cli.add_command(hello)
 cli.add_command(init)
 cli.add_command(add_height_files)
+cli.add_command(add_osm_files)
 cli.add_command(set_window)
 cli.add_command(status)
 cli.add_command(reset)

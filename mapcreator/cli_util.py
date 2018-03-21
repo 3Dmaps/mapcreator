@@ -2,6 +2,7 @@ import click
 from mapcreator import building
 from mapcreator import persistence
 from mapcreator import echoes
+from mapcreator.state import FileAddResult
 
 
 """
@@ -63,3 +64,28 @@ def build_clean_or_error():
         return False
     else: 
         return True
+
+def add_files(files, add_method_name):
+    state = load_or_error()
+    if not state: return
+    echoes.info('Adding files to project...')
+    count = 0
+    for fpath in files:
+        result = getattr(state, add_method_name)(fpath) # Call method which name is add_method_name
+        if result == FileAddResult.DOESNT_EXIST:
+            echoes.error('File "{}" doesn\'t exist!'.format(fpath))
+        elif result == FileAddResult.ALREADY_ADDED:
+            echoes.warn('{} has already been added to this project'.format(fpath))
+        elif result == FileAddResult.SUCCESS:
+            echoes.info('"{}" added'.format(fpath))
+            count += 1
+        else:
+            echoes.error('Unrecognized FileAddResult {} when trying to add {}!'.format(result, fpath))
+    if count > 0:
+        if not save_or_error(state): return
+        if count == len(files):
+            echoes.success("{} files added to the project successfully!".format(len(files)))
+        else:
+            echoes.warn("{} files (out of {}) added to the project successfully".format(count, len(files)))
+    else:
+        echoes.warn('No files were added.')
