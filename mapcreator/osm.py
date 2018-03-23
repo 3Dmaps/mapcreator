@@ -9,6 +9,8 @@ class OSMData:
     TAG_WAY_NODE = 'nd'
     ATTRIB_ID = 'id'
     ATTRIB_REF = 'ref'
+    ATTRIB_LAT = 'lat'
+    ATTRIB_LON = 'lon'
 
     def __init__(self):
         self.node_filters = []
@@ -136,3 +138,21 @@ class OSMData:
         self.do_filter()
         self.prepare_for_save()
         self.tree.write(path, encoding='utf-8', xml_declaration=True)
+
+class WayCoordinateFilter:
+    def __init__(self, minx, maxx, miny, maxy):
+        self.minx = minx
+        self.miny = miny
+        self.maxx = maxx
+        self.maxy = maxy
+    def filter(self, elem, osmdata):
+        for ref in elem.iter(OSMData.TAG_WAY_NODE):
+            try:
+                node = osmdata.nodes[int(ref.get(OSMData.ATTRIB_REF))]
+                x = float(node.get(OSMData.ATTRIB_LON))
+                y = float(node.get(OSMData.ATTRIB_LAT))
+            except ValueError:
+                continue # Just skip any dirty data
+            if self.minx <= x and x <= self.maxx and self.miny <= y and y <= self.maxy:
+                return True
+        return False
