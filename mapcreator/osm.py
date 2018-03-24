@@ -1,6 +1,4 @@
 from xml.etree import ElementTree
-import logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class OSMData:
 
@@ -13,6 +11,8 @@ class OSMData:
     ATTRIB_REF = 'ref'
     ATTRIB_KEY = 'k'
     ATTRIB_VALUE = 'v'
+    ATTRIB_LAT = 'lat'
+    ATTRIB_LON = 'lon'
     KEY_LANDUSE = 'landuse'
     VALUE_LANDUSE_MEADOW = 'meadow'
 
@@ -151,3 +151,21 @@ def areaFilter(elem, osmdata):
         if tagElement.get(OSMData.ATTRIB_KEY) == OSMData.KEY_LANDUSE and tagElement.get(OSMData.ATTRIB_VALUE) == OSMData.VALUE_LANDUSE_MEADOW:
             return True
     return False
+
+class WayCoordinateFilter:
+    def __init__(self, minx, maxx, miny, maxy):
+        self.minx = minx
+        self.miny = miny
+        self.maxx = maxx
+        self.maxy = maxy
+    def filter(self, elem, osmdata):
+        for ref in elem.iter(OSMData.TAG_WAY_NODE):
+            try:
+                node = osmdata.nodes[int(ref.get(OSMData.ATTRIB_REF))]
+                x = float(node.get(OSMData.ATTRIB_LON))
+                y = float(node.get(OSMData.ATTRIB_LAT))
+            except ValueError:
+                continue # Just skip any dirty data
+            if self.minx <= x and x <= self.maxx and self.miny <= y and y <= self.maxy:
+                return True
+        return False

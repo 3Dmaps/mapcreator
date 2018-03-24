@@ -1,9 +1,10 @@
 import os
 import shutil
-from mapcreator.osm import OSMData, areaFilter
+from mapcreator.osm import OSMData, areaFilter, WayCoordinateFilter
 from os import path, mkdir
 from util import get_resource_path, assert_xml_equal
 
+CLEAN_TEMP_DIR = True
 TEMP_DIR = '.test_osm'
 
 def setup_function(function):
@@ -50,6 +51,14 @@ def test_osm_terrainfilter():
     data.save(result_path)
     assert_xml_equal(get_resource_path('test_osm_terrains_expected.xml'), result_path)
 
+def test_way_coordinate_filter():
+    wcf = WayCoordinateFilter(-112.060, -112.000, 36.050, 36.109)
+    data = OSMData.load(get_resource_path('test_osm_input.xml'))
+    data.add_way_filter(wcf.filter)
+    result_path = path.join(TEMP_DIR, 'test_osm_result.xml')
+    data.save(result_path)
+    assert_xml_equal(get_resource_path('test_osm_expected_way_coord_filter.xml'), result_path)
+
 def teardown_function(function):
-    if path.exists(TEMP_DIR):
+    if CLEAN_TEMP_DIR and path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
