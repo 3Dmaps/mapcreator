@@ -1,5 +1,6 @@
 from xml.etree import ElementTree
-
+import logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class OSMData:
 
@@ -7,8 +8,13 @@ class OSMData:
     TAG_NODE = 'node'
     TAG_WAY = 'way'
     TAG_WAY_NODE = 'nd'
+    TAG_TAG = 'tag'
     ATTRIB_ID = 'id'
     ATTRIB_REF = 'ref'
+    ATTRIB_KEY = 'k'
+    ATTRIB_VALUE = 'v'
+    KEY_LANDUSE = 'landuse'
+    VALUE_LANDUSE_MEADOW = 'meadow'
 
     def __init__(self):
         self.node_filters = []
@@ -136,3 +142,12 @@ class OSMData:
         self.do_filter()
         self.prepare_for_save()
         self.tree.write(path, encoding='utf-8', xml_declaration=True)
+    
+def areaFilter(elem, osmdata):
+    """
+    Currently filters in only areas with "landuse" "meadow"
+    """
+    for tagElement in elem.findall(OSMData.TAG_TAG):
+        if tagElement.get(OSMData.ATTRIB_KEY) == OSMData.KEY_LANDUSE and tagElement.get(OSMData.ATTRIB_VALUE) == OSMData.VALUE_LANDUSE_MEADOW:
+            return True
+    return False

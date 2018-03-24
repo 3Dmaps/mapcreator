@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version="0.6" generator="osmium/1.6.1">
+
+  <node id="1862787943" version="1" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" changeset="12700232" lat="36.2393212" lon="-112.0474108"/>
+  <node id="1862787944" version="1" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" changeset="12700232" lat="36.239377" lon="-112.0475624"/>
+  <node id="1862787945" version="1" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" changeset="12700232" lat="36.2393945" lon="-112.0476379"/>
+  <node id="1862787946" version="1" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" changeset="12700232" lat="36.2394677" lon="-112.0468385"/>
+  <node id="1862787947" version="1" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" changeset="12700232" lat="36.2396069" lon="-112.0467204"/>
+  <node id="1862787949" version="1" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" changeset="12700232" lat="36.2396655" lon="-112.0475561"/>
+  <node id="1862787967" version="1" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" changeset="12700232" lat="36.2404423" lon="-112.0473199"/>
+  <node id="1862787968" version="1" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" changeset="12700232" lat="36.2404495" lon="-112.0475107"/>
+
+  <node id="1867258408" version="1" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" changeset="12738796" lat="36.0337569" lon="-111.8196722"/>
+  <node id="1867258409" version="1" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" changeset="12738796" lat="36.0337637" lon="-111.8193618"/>
+  <node id="1867258411" version="1" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" changeset="12738796" lat="36.0337802" lon="-111.8197112"/>
+  <node id="1867258412" version="1" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" changeset="12738796" lat="36.0337939" lon="-111.8193312"/>
+  <node id="1867258421" version="1" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" changeset="12738796" lat="36.034012" lon="-111.819757"/>
+  <node id="1867258423" version="1" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" changeset="12738796" lat="36.0340463" lon="-111.8197485"/>
+  <node id="1867258425" version="1" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" changeset="12738796" lat="36.0340806" lon="-111.8193889"/>
+  <node id="1867258426" version="1" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" changeset="12738796" lat="36.0340834" lon="-111.8200844"/>
+  <node id="1867258427" version="1" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" changeset="12738796" lat="36.0340916" lon="-111.8210208"/>
+  <node id="1867258428" version="1" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" changeset="12738796" lat="36.0341328" lon="-111.8194449"/>
+
+  <node id="359252270" version="1" timestamp="2009-03-12T00:46:19Z" uid="4732" user="iandees" changeset="794649" lat="36.0094279" lon="-112.3896212">
+    <tag k="ele" v="1817"/>
+    <tag k="name" v="TK Tank"/>
+    <tag k="landuse" v="reservoir"/>
+    <tag k="gnis:created" v="02/08/1980"/>
+    <tag k="gnis:state_id" v="04"/>
+    <tag k="gnis:county_id" v="005"/>
+    <tag k="gnis:feature_id" v="12102"/>
+  </node>
+
+  <way id="175717387" version="1" timestamp="2012-08-12T11:06:39Z" uid="24920" user="Schusch" changeset="12700232">
+    <nd ref="1862787945"/>
+    <nd ref="1862787949"/>
+    <nd ref="1862787968"/>
+    <nd ref="1862787967"/>
+    <nd ref="1862787947"/>
+    <nd ref="1862787946"/>
+    <nd ref="1862787943"/>
+    <nd ref="1862787945"/>
+    <tag k="landuse" v="meadow"/>
+  </way>
+
+  <way id="176173078" version="2" timestamp="2013-02-28T23:33:11Z" uid="183021" user="tomthepom" changeset="15203586">
+    <nd ref="1867258423"/>
+    <nd ref="1867258428"/>
+    <nd ref="1867258425"/>
+    <nd ref="1867258412"/>
+    <nd ref="1867258409"/>
+    <nd ref="1867258408"/>
+    <nd ref="1867258411"/>
+    <nd ref="1867258421"/>
+    <nd ref="1867258423"/>
+    <tag k="landuse" v="nonexistant_test"/>
+  </way>
+</osm>
