@@ -14,7 +14,7 @@ class OSMData:
     ATTRIB_LAT = 'lat'
     ATTRIB_LON = 'lon'
     KEY_LANDUSE = 'landuse'
-    VALUE_LANDUSE_MEADOW = 'meadow'
+    ACCEPTED_LANDUSES = ['meadow']
 
     def __init__(self):
         self.node_filters = []
@@ -145,10 +145,11 @@ class OSMData:
     
 def areaFilter(elem, osmdata):
     """
-    Currently filters in only areas with "landuse" "meadow"
+    Currently filters in only areas with "landuse" in the accepted landuses list.
     """
     for tagElement in elem.findall(OSMData.TAG_TAG):
-        if tagElement.get(OSMData.ATTRIB_KEY) == OSMData.KEY_LANDUSE and tagElement.get(OSMData.ATTRIB_VALUE) == OSMData.VALUE_LANDUSE_MEADOW:
+        # Check landuses
+        if tagElement.get(OSMData.ATTRIB_KEY) == OSMData.KEY_LANDUSE and tagElement.get(OSMData.ATTRIB_VALUE) in OSMData.ACCEPTED_LANDUSES:
             return True
     return False
 
