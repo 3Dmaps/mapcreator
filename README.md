@@ -22,8 +22,9 @@ If you wan't to build files, you need to install GDAL.
 mapcreator --help
 ```
 ## Help on a command
+```
 mapcreator \[command] --help
-
+```
 ## Sample command sequence
 Place the altitude source files (e.g. n37w113.img) and Open Street Map XML files (e.g. Sampletrails.xml) in a folder.
 In the folder, input:
