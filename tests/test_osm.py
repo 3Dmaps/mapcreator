@@ -1,6 +1,6 @@
 import os
 import shutil
-from mapcreator.osm import OSMData, WayCoordinateFilter
+from mapcreator.osm import OSMData, areaFilter, WayCoordinateFilter
 from os import path, mkdir
 from util import get_resource_path, assert_xml_equal
 
@@ -42,6 +42,14 @@ def test_osmdata():
     result_path = path.join(TEMP_DIR, 'test_osm_result.xml')
     data.save(result_path)
     assert_xml_equal(get_resource_path('test_osm_expected.xml'), result_path)
+
+def test_osm_terrainfilter():
+    data = OSMData.load(get_resource_path('test_osm_terrains_input.xml'))
+    data.add_way_filter(areaFilter)
+    
+    result_path = path.join(TEMP_DIR, 'test_osm_terrains_result.xml')
+    data.save(result_path)
+    assert_xml_equal(get_resource_path('test_osm_terrains_expected.xml'), result_path)
 
 def test_way_coordinate_filter():
     wcf = WayCoordinateFilter(-112.060, -112.000, 36.050, 36.109)

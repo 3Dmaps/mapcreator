@@ -1,16 +1,20 @@
 from xml.etree import ElementTree
 
-
 class OSMData:
 
     TAG_ROOT = 'osm'
     TAG_NODE = 'node'
     TAG_WAY = 'way'
     TAG_WAY_NODE = 'nd'
+    TAG_TAG = 'tag'
     ATTRIB_ID = 'id'
     ATTRIB_REF = 'ref'
+    ATTRIB_KEY = 'k'
+    ATTRIB_VALUE = 'v'
     ATTRIB_LAT = 'lat'
     ATTRIB_LON = 'lon'
+    KEY_LANDUSE = 'landuse'
+    ACCEPTED_LANDUSES = ['meadow']
 
     def __init__(self):
         self.node_filters = []
@@ -138,6 +142,16 @@ class OSMData:
         self.do_filter()
         self.prepare_for_save()
         self.tree.write(path, encoding='utf-8', xml_declaration=True)
+    
+def areaFilter(elem, osmdata):
+    """
+    Currently filters in only areas with "landuse" in the accepted landuses list.
+    """
+    for tagElement in elem.findall(OSMData.TAG_TAG):
+        # Check landuses
+        if tagElement.get(OSMData.ATTRIB_KEY) == OSMData.KEY_LANDUSE and tagElement.get(OSMData.ATTRIB_VALUE) in OSMData.ACCEPTED_LANDUSES:
+            return True
+    return False
 
 class WayCoordinateFilter:
     def __init__(self, minx, maxx, miny, maxy):
