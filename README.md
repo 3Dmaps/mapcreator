@@ -1,5 +1,5 @@
 # mapcreator
-Map creator tool for 3Dmaps application
+Map creator tool for 3Dmaps application. A subproject of the [*3DMaps in augmented reality*](https://github.com/3Dmaps/3Dmaps). Built on the Software production project course / Univ. of Helsinki, spring 2018. Additional information: see main project repository.
 
 ## Installation
 This project requires [Python 3](https://www.python.org/downloads/) to run.
@@ -39,3 +39,18 @@ The resulting map data is saved in the file 3dmapdata.zip:
 * altitude file (heightfile0.bin)
 * altitude metadata file (heightfile0.hdr)
 * XML file containing trails and terrain types (heightfile0_osm.xml)
+
+## Running the tests
+To locally run the automated tests, enter `pytest` in the project's root folder.
+
+## Continuous integration
+The project uses Travis as its continous integration platform. Travis automatically builds and tests the master branch.
+
+## Built With
+* [Python 3](https://www.python.org/)
+
+## Versioning
+Versioning. *Not defined yet.*
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
