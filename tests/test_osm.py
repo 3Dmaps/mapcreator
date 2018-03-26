@@ -1,6 +1,6 @@
 import os
 import shutil
-from mapcreator.osm import OSMData, areaFilter, WayCoordinateFilter
+from mapcreator.osm import OSMData, areaFilter, WayCoordinateFilter, trailFilter
 from os import path, mkdir
 from util import get_resource_path, assert_xml_equal
 
@@ -58,6 +58,23 @@ def test_way_coordinate_filter():
     result_path = path.join(TEMP_DIR, 'test_osm_result.xml')
     data.save(result_path)
     assert_xml_equal(get_resource_path('test_osm_expected_way_coord_filter.xml'), result_path)
+
+def test_osm_trailfilter():
+    data = OSMData.load(get_resource_path('test_osm_trails_input.xml'))
+    data.add_way_filter(trailFilter)
+    
+    result_path = path.join(TEMP_DIR, 'test_osm_trails_result.xml')
+    data.save(result_path)
+    assert_xml_equal(get_resource_path('test_osm_trails_expected.xml'), result_path)
+
+def test_osm_trailfilter_with_coordinates():
+    wcf = WayCoordinateFilter(-113.0, -112.0, 36.0, 37.0)
+    data = OSMData.load(get_resource_path('test_osm_trails_input.xml'))
+    data.add_way_filter(trailFilter, wcf.filter)
+    
+    result_path = path.join(TEMP_DIR, 'test_osm_trails_and_coordinates_result.xml')
+    data.save(result_path)
+    assert_xml_equal(get_resource_path('test_osm_trails_and_coordinates_expected.xml'), result_path)
 
 def teardown_function(function):
     if CLEAN_TEMP_DIR and path.exists(TEMP_DIR):
