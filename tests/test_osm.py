@@ -40,6 +40,8 @@ def test_osmdata():
     data.add_way_filter(way_filter_a, way_filter_b) #Way filter a and way filter b
     data.add_way_filter(way_filter_c) #Or way filter c
     result_path = path.join(TEMP_DIR, 'test_osm_result.xml')
+    data.do_filter()
+    data.prepare_for_save()
     data.save(result_path)
     assert_xml_equal(get_resource_path('test_osm_expected.xml'), result_path)
 
@@ -56,6 +58,8 @@ def test_way_coordinate_filter():
     data = OSMData.load(get_resource_path('test_osm_input.xml'))
     data.add_way_filter(wcf.filter)
     result_path = path.join(TEMP_DIR, 'test_osm_result.xml')
+    data.do_filter()
+    data.prepare_for_save()
     data.save(result_path)
     assert_xml_equal(get_resource_path('test_osm_expected_way_coord_filter.xml'), result_path)
 

@@ -138,7 +138,7 @@ def test_build_does_nothing_if_state_has_no_height_files(mock_init):
 
 @patch('os.path.exists', lambda s: False)
 @patch('mapcreator.persistence.state_exists', lambda: True)
-@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b']}))
+@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b'], 'osm_files': []}))
 @patch('mapcreator.building.init_build', side_effect = OSError('Shouldn\'t have run this!'))
 def test_build_does_nothing_if_init_fails(mock_init):
     runner = CliRunner()
@@ -150,7 +150,7 @@ def test_build_does_nothing_if_init_fails(mock_init):
 
 @patch('os.path.exists', lambda s: False)
 @patch('mapcreator.persistence.state_exists', lambda: True)
-@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b', 'c']}))
+@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b', 'c'], 'osm_files': []}))
 @patch('mapcreator.building.init_build', lambda: True)
 @patch('mapcreator.building.cleanup', lambda: True)
 @patch('mapcreator.building.package')
@@ -177,7 +177,7 @@ def test_build_works_correctly(mock_package):
 
 @patch('os.path.exists', lambda s: True)
 @patch('mapcreator.persistence.state_exists', lambda: True)
-@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b', 'c']}))
+@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b', 'c'], 'osm_files': []}))
 @patch('mapcreator.building.init_build', lambda: True)
 @patch('mapcreator.building.cleanup', lambda: True)
 @patch('mapcreator.building.package')

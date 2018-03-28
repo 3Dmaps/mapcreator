@@ -89,3 +89,26 @@ def add_files(files, add_method_name):
             echoes.warn("{} files (out of {}) added to the project successfully".format(count, len(files)))
     else:
         echoes.warn('No files were added.')
+
+def do_build(files, statusclass, actions, state, debug = False):
+    has_errors = False
+    outfiles = []
+    for index, f in enumerate(files):
+        echoes.info('Processing {}...'.format(f))
+        buildstatus = statusclass(index, f, state)
+        errors = []
+        with click.progressbar(actions, bar_template=echoes.PROGRESS_BAR_TEMPLATE, show_eta=False) as bar:
+            for action in bar:
+                try:
+                    action(buildstatus, debug)
+                except Exception as e:
+                    errors.append(e)
+                    has_errors = True
+        if errors:
+            echoes.error('Exceptions caught when processing {}:'.format(f))
+            for e in errors:
+                echoes.error(e)
+        for line in str(buildstatus).split('\n'):
+            echoes.info(line)
+        outfiles.extend(buildstatus.get_result_files())
+    return (outfiles, has_errors)

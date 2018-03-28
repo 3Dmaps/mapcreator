@@ -117,25 +117,19 @@ def build(output, force, debug, clean):
 
     outfiles = []
     has_errors = False
-    for index, heightfile in enumerate(state.height_files):
-        info('Processing {}...'.format(heightfile))
-        buildstatus = building.BuildStatus(index, heightfile, state)
-        errors = []
-        with click.progressbar(building.BUILD_ACTIONS, bar_template=PROGRESS_BAR_TEMPLATE, show_eta=False) as bar:
-            for action in bar:
-                try:
-                    action(buildstatus, debug)
-                except Exception as e:
-                    errors.append(e)
-                    has_errors = True
-        if errors:
-            error('Exceptions caught when processing {}:'.format(heightfile))
-            for e in errors:
-                error(e)
-        for line in str(buildstatus).split('\n'):
-            info(line)
-        outfiles.extend(buildstatus.result_files)
-    
+
+    build_outfiles, build_has_errors = do_build(
+        state.height_files, building.BuildStatus, building.BUILD_ACTIONS, state, debug
+        )
+    has_errors |= build_has_errors
+    outfiles.extend(build_outfiles)
+
+    osm_outfiles, osm_has_errors = do_build(
+        state.osm_files, building.OSMStatus, building.OSM_ACTIONS, state, debug
+    )
+    has_errors |= osm_has_errors
+    outfiles.extend(osm_outfiles)
+
     info('Building package...')
     try:
         building.package(output, outfiles)

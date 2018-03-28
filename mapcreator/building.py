@@ -4,7 +4,8 @@ import shutil
 from os import path, listdir, makedirs, rename, remove, devnull
 from io import StringIO
 from zipfile import ZipFile, ZIP_DEFLATED
-from mapcreator import persistence
+from mapcreator import persistence, osm
+from mapcreator.osm import OSMData
 
 BUILD_DIR = path.join(persistence.STATE_DIR, 'build')
 FINALIZED_DIR = path.join(BUILD_DIR, 'finalized')
@@ -21,9 +22,11 @@ OUTPUT_CELLSIZE = 10
 OUTPUT_FORMAT = 'ENVI'
 OUTPUT_FILE_EXTENSION = 'bin'
 METADATA_FILE_EXTENSION = 'hdr'
+OSM_FILE_EXTENSION = 'osm'
 
 FINAL_FILENAME_FORMAT = 'heightfile{}.' + OUTPUT_FILE_EXTENSION
 FINAL_METADATA_FORMAT = 'heightfile{}.' + METADATA_FILE_EXTENSION
+FINAL_OSM_FORMAT = 'osmfile{}.' + OSM_FILE_EXTENSION
 
 class BuildStatus:
     def __init__(self, index, heightfile, state):
@@ -35,6 +38,8 @@ class BuildStatus:
         self.result_files = []
     def add_result_file(self, file):
         self.result_files.append(file)
+    def get_result_files(self):
+        return self.result_files
     def __str__(self):
         lines = ['Build results for {}:'.format(path.basename(self.original_file))]
         if self.result_files:
@@ -117,6 +122,43 @@ def finalize(buildstatus, debug = False):
     buildstatus.current_file = final_path
     buildstatus.add_result_file(final_path)
 
+class OSMStatus:
+    def __init__(self, index, inpath, state):
+        self.state = state
+        self.path = inpath
+        self.index = index
+        self.osmdata = None
+        self.result = None
+    def get_result_files(self):
+        return [self.result]
+    def __str__(self):
+        return 'Converted {} to {}'.format(self.path, self.result)
+
+def load_osm(osmstatus, debug = False):
+    osmstatus.osmdata = OSMData.load(osmstatus.path)
+
+def add_filters(osmstatus, debug = False):
+    data = osmstatus.osmdata
+    if osmstatus.state.has_window():
+        ulx, uly = osmstatus.state.get_window_upper_left()
+        lrx, lry = osmstatus.state.get_window_lower_right()
+        minx = min(ulx, lrx)
+        miny = min(uly, lry)
+        maxx = max(ulx, uly)
+        maxy = max(uly, lry)
+        data.add_way_filter(osm.WayCoordinateFilter(minx, maxx, miny, maxy).filter)
+
+def apply_filters(osmstatus, debug = False):
+    osmstatus.osmdata.do_filter()
+
+def prepare_write(osmstatus, debug = False):
+    osmstatus.osmdata.prepare_for_save()
+
+def write(osmstatus, debug = False):
+    outpath = path.join(FINALIZED_DIR, FINAL_OSM_FORMAT.format(osmstatus.index))
+    osmstatus.osmdata.save(outpath)
+    osmstatus.result = outpath
+
 def package(package_name, files):
     with ZipFile(package_name, 'w', ZIP_DEFLATED) as package:
         for f in files:
@@ -130,4 +172,8 @@ def cleanup():
 
 BUILD_ACTIONS = (
     prepare, cut_projection_window, reproject, translate, finalize
+)
+
+OSM_ACTIONS = (
+    load_osm, add_filters, apply_filters, prepare_write, write
 )

@@ -141,8 +141,6 @@ class OSMData:
                 root.remove(node)
 
     def save(self, path):
-        self.do_filter()
-        self.prepare_for_save()
         self.tree.write(path, encoding='utf-8', xml_declaration=True)
     
 def areaFilter(elem, osmdata):
