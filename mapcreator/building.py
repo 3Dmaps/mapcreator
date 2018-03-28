@@ -22,11 +22,11 @@ OUTPUT_CELLSIZE = 10
 OUTPUT_FORMAT = 'ENVI'
 OUTPUT_FILE_EXTENSION = 'bin'
 METADATA_FILE_EXTENSION = 'hdr'
-OSM_FILE_EXTENSION = 'osm'
+OSM_FILE_EXTENSION = 'xml'
 
 FINAL_FILENAME_FORMAT = 'heightfile{}.' + OUTPUT_FILE_EXTENSION
 FINAL_METADATA_FORMAT = 'heightfile{}.' + METADATA_FILE_EXTENSION
-FINAL_OSM_FORMAT = 'osmfile{}.' + OSM_FILE_EXTENSION
+FINAL_OSM_FORMAT = 'heightfile{}_trails.' + OSM_FILE_EXTENSION
 
 class BuildStatus:
     def __init__(self, index, heightfile, state):
