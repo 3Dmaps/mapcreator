@@ -50,6 +50,8 @@ def test_osm_terrainfilter():
     data.add_way_filter(areaFilter)
     
     result_path = path.join(TEMP_DIR, 'test_osm_terrains_result.xml')
+    data.do_filter()
+    data.prepare_for_save()
     data.save(result_path)
     assert_xml_equal(get_resource_path('test_osm_terrains_expected.xml'), result_path)
 
@@ -68,6 +70,8 @@ def test_osm_trailfilter():
     data.add_way_filter(trailFilter)
     
     result_path = path.join(TEMP_DIR, 'test_osm_trails_result.xml')
+    data.do_filter()
+    data.prepare_for_save()
     data.save(result_path)
     assert_xml_equal(get_resource_path('test_osm_trails_expected.xml'), result_path)
 
@@ -77,6 +81,8 @@ def test_osm_trailfilter_with_coordinates():
     data.add_way_filter(trailFilter, wcf.filter)
     
     result_path = path.join(TEMP_DIR, 'test_osm_trails_and_coordinates_result.xml')
+    data.do_filter()
+    data.prepare_for_save()
     data.save(result_path)
     assert_xml_equal(get_resource_path('test_osm_trails_and_coordinates_expected.xml'), result_path)
 

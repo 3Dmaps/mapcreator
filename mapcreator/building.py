@@ -139,6 +139,8 @@ def load_osm(osmstatus, debug = False):
 
 def add_filters(osmstatus, debug = False):
     data = osmstatus.osmdata
+    data.add_filters(osm.areaFilter)
+    data.add_filters(osm.trailFilter)
     if osmstatus.state.has_window():
         ulx, uly = osmstatus.state.get_window_upper_left()
         lrx, lry = osmstatus.state.get_window_lower_right()
