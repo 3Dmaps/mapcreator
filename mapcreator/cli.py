@@ -117,7 +117,9 @@ def build(output, force, debug, clean):
 
     outfiles = []
     has_errors = False
-
+    current_height_files = combine_files(state.height_files)
+    state.set_height_files(current_height_files)
+    #info('Length of height files: ' + str(len(current_height_files)))
     build_outfiles, build_has_errors = do_build(
         state.height_files, building.BuildStatus, building.BUILD_ACTIONS, state, debug
         )

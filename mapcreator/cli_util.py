@@ -112,3 +112,13 @@ def do_build(files, statusclass, actions, state, debug = False):
             echoes.info(line)
         outfiles.extend(buildstatus.get_result_files())
     return (outfiles, has_errors)
+
+def combine_files(files):
+    print('Source files:' + str(files))
+    print('Length of files: ' + str(len(files)))
+    if len(files) > 1:
+        combined_file = building.merge(files)
+        del files[:]
+        files.append(combined_file)
+    print('File list after combining: ' + str(files))    
+    return files

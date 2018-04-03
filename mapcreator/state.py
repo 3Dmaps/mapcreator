@@ -20,6 +20,9 @@ class State:
 
     def add_height_file(self, fpath):
         return State.add_file(fpath, self.height_files)
+
+    def set_height_files(self, files):
+        self.height_files = files
     
     def add_osm_file(self, fpath):
         return State.add_file(fpath, self.osm_files)

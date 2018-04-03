@@ -13,6 +13,7 @@ FINALIZED_DIR = path.join(BUILD_DIR, 'finalized')
 OUTPUT_FILENAME_REGEX = re.compile(r'^\[(\d+)\](.*)')
 OUTPUT_FILENAME_FORMAT = '[{}]{}'
 
+COMBINED_FILE_EXTENSION = 'img'
 INTERNAL_FORMAT = 'GTiff'
 INTERNAL_FILE_EXTENSION = 'tiff'
 
@@ -64,6 +65,18 @@ def init_build():
         cleanup()
     makedirs(BUILD_DIR)
     makedirs(FINALIZED_DIR)
+
+def merge(sourcefiles, debug = False):
+    """
+    Merge source altitude map files into a single file.
+    """ 
+    combined_file_name = 'combined.'+ COMBINED_FILE_EXTENSION
+    outpath = path.abspath(path.join(BUILD_DIR, combined_file_name))
+    sourcefiles_as_string = ''.join(map(path.basename, sourcefiles))
+    command = 'gdalwarp {} {}'.format(sourcefiles_as_string, outpath)
+    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
+        process.communicate()
+    return outpath
 
 def get_output_path(input_path, new_extension = ''):
     input_filename = path.basename(input_path)
@@ -170,6 +183,7 @@ def temp_build_files_exist():
 
 def cleanup():
     shutil.rmtree(BUILD_DIR)
+    
 
 BUILD_ACTIONS = (
     prepare, cut_projection_window, reproject, translate, finalize
