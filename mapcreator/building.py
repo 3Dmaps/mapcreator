@@ -4,7 +4,7 @@ import shutil
 from os import path, listdir, makedirs, rename, remove, devnull
 from io import StringIO
 from zipfile import ZipFile, ZIP_DEFLATED
-from mapcreator import persistence, osm
+from mapcreator import persistence, osm, gdal_util
 from mapcreator.osm import OSMData
 
 BUILD_DIR = path.join(persistence.STATE_DIR, 'build')
@@ -24,6 +24,7 @@ OUTPUT_FILE_EXTENSION = 'bin'
 METADATA_FILE_EXTENSION = 'hdr'
 OSM_FILE_EXTENSION = 'xml'
 
+INTERMEDIATE_FILENAME_FORMAT = 'heightfile{}.' + INTERNAL_FILE_EXTENSION
 FINAL_FILENAME_FORMAT = 'heightfile{}.' + OUTPUT_FILE_EXTENSION
 FINAL_METADATA_FORMAT = 'heightfile{}.' + METADATA_FILE_EXTENSION
 FINAL_OSM_FORMAT = 'heightfile{}_trails.' + OSM_FILE_EXTENSION
@@ -36,6 +37,7 @@ class BuildStatus:
         self.current_file = heightfile
         self.state = state
         self.result_files = []
+        self.window_exists = True
     def add_result_file(self, file):
         self.result_files.append(file)
     def get_result_files(self):
@@ -57,7 +59,6 @@ def call_command(command, buildstatus, debug = False):
         stdout, stderr = process.communicate()
         if debug: buildstatus.output.write(stdout.decode('utf-8'))
         buildstatus.output.write(stderr.decode('utf-8'))
-
 
 def init_build():
     if temp_build_files_exist():
@@ -88,15 +89,21 @@ def prepare(buildstatus, debug = False):
 def cut_projection_window(buildstatus, debug = False):
     if buildstatus.state.has_window():
         outpath = get_output_path(buildstatus.current_file)
-        command = 'gdalwarp -te {} {} {}'.format(buildstatus.state.get_window_string_lowerleft_topright(), buildstatus.current_file, outpath)
-        call_command(command, buildstatus, debug)
-        buildstatus.current_file = outpath
+        gdal_info = gdal_util.Gdalinfo.for_file(buildstatus.current_file)
+        cut_projection_window = buildstatus.state.get_window_string_lowerleft_topright_cut(gdal_info)
+        if cut_projection_window:
+            command = 'gdalwarp -te {} {} {}'.format(cut_projection_window, buildstatus.current_file, outpath)
+            call_command(command, buildstatus, debug)
+            buildstatus.current_file = outpath
+        else:
+            buildstatus.window_exists = False
 
 def reproject(buildstatus, debug = False):
-    outpath = get_output_path(buildstatus.current_file)
-    command = 'gdalwarp -tr {} {} -t_srs {} -r bilinear {} {}'.format(OUTPUT_CELLSIZE, OUTPUT_CELLSIZE, PROJECTION_IDENTIFIER, buildstatus.current_file, outpath)
-    call_command(command, buildstatus, debug)
-    buildstatus.current_file = outpath
+    if buildstatus.window_exists:
+        outpath = get_output_path(buildstatus.current_file)
+        command = 'gdalwarp -tr {} {} -t_srs {} -r bilinear {} {}'.format(OUTPUT_CELLSIZE, OUTPUT_CELLSIZE, PROJECTION_IDENTIFIER, buildstatus.current_file, outpath)
+        call_command(command, buildstatus, debug)
+        buildstatus.current_file = outpath
 
 def translate(buildstatus, debug = False):
     outpath = get_output_path(buildstatus.current_file, OUTPUT_FILE_EXTENSION)
@@ -114,13 +121,42 @@ def translate(buildstatus, debug = False):
 
 
 def finalize(buildstatus, debug = False):
-    if buildstatus.current_file == buildstatus.original_file:
+    if buildstatus.current_file == buildstatus.original_file or not buildstatus.window_exists:
         raise RuntimeError('No actions have been done --> Not finalizing anything')
-    final_filename = FINAL_FILENAME_FORMAT.format(buildstatus.index)
+    final_filename = INTERMEDIATE_FILENAME_FORMAT.format(buildstatus.index)
     final_path = path.join(FINALIZED_DIR, final_filename)
     rename(buildstatus.current_file, final_path)
     buildstatus.current_file = final_path
     buildstatus.add_result_file(final_path)
+
+def merge_mapfiles(mapfiles):
+    """
+    Merge source map files into a single file.
+    """ 
+    combined_file_name = INTERMEDIATE_FILENAME_FORMAT.format('_combined')
+    single_path = path.join(FINALIZED_DIR, combined_file_name)
+    sourcefiles_as_string = ' '.join(mapfiles)
+    command = 'gdalwarp {} {}'.format(sourcefiles_as_string, single_path)
+    
+    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
+        stdout, stderr = process.communicate()
+        print(stderr.decode('utf-8'))
+
+    final_path, metapath = translate_merged(single_path)
+    return final_path, metapath
+
+def translate_merged(combined_file):
+    combined_file_name = FINAL_FILENAME_FORMAT.format('_combined_bin')
+    final_path = path.join(FINALIZED_DIR, combined_file_name)
+    metapath = path.join(FINALIZED_DIR, FINAL_METADATA_FORMAT.format('_combined_bin'))
+
+    command = 'gdal_translate -of {} {} {}'.format(OUTPUT_FORMAT, combined_file, final_path)
+
+    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as process:
+        stdout, stderr = process.communicate()
+        print(stderr.decode('utf-8'))    
+
+    return final_path, metapath
 
 class OSMStatus:
     def __init__(self, index, inpath, state):
@@ -172,7 +208,9 @@ def cleanup():
     shutil.rmtree(BUILD_DIR)
 
 BUILD_ACTIONS = (
-    prepare, cut_projection_window, reproject, translate, finalize
+    # Removed translate when changing to merging map files
+    #prepare, cut_projection_window, reproject, translate, finalize
+    prepare, cut_projection_window, reproject, finalize
 )
 
 OSM_ACTIONS = (

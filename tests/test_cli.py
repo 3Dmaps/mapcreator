@@ -173,7 +173,7 @@ def test_build_works_correctly(mock_package):
     result = runner.invoke(cli, ['build', '-do', 'test2.zip'])
     assert result.exit_code == 0
     assert 'SUCCESS' in result.output
-    mock_package.assert_called_once_with('test2.zip', ['aa', 'aa1', 'bb', 'bb1', 'cc', 'cc1'])
+    mock_package.assert_called_once_with('test2.zip', ['.test_mapcreator_build\\finalized\\heightfile_combined_bin.bin', '.test_mapcreator_build\\finalized\\heightfile_combined_bin.hdr'])
 
 @patch('os.path.exists', lambda s: True)
 @patch('mapcreator.persistence.state_exists', lambda: True)
@@ -207,7 +207,7 @@ def test_build_throws_errors_correctly(mock_package):
     assert 'Hecking cool' in result.output
     assert 'Build done (but there were errors)' in result.output
     assert 'SUCCESS' not in result.output
-    mock_package.assert_called_once_with('test2.zip', ['aa', 'aa1', 'cc', 'cc1'])
+    mock_package.assert_called_once_with('test2.zip', ['.test_mapcreator_build\\finalized\\heightfile_combined_bin.bin', '.test_mapcreator_build\\finalized\\heightfile_combined_bin.hdr'])
 
 @patch('mapcreator.persistence.state_exists', lambda: True)
 @patch('mapcreator.persistence.clear_state')
