@@ -63,6 +63,16 @@ def add_osm_files(files):
     add_files(files, 'add_osm_file')
 
 @click.command()
+@click.argument('files', nargs=-1)
+def add_satellite_files(files):
+    """Adds given satellite image files to the project"""
+    if len(files) == 0:
+        warn('No files were specified.')
+        info('Try mapcreator add_satellite_files [file 1] [file 2] ... [file n]')
+        return
+    add_files(files, 'add_satellite_file')
+
+@click.command()
 @click.argument('ulx', type=float)
 @click.argument('uly', type=float)
 @click.argument('lrx', type=float)
@@ -182,6 +192,7 @@ def reset():
 cli.add_command(hello)
 cli.add_command(init)
 cli.add_command(add_height_files)
+cli.add_command(add_satellite_files)
 cli.add_command(add_osm_files)
 cli.add_command(set_window)
 cli.add_command(status)
