@@ -122,9 +122,7 @@ def build(output, force, debug, clean):
         state.height_files, building.BuildStatus, building.BUILD_ACTIONS, state, debug
         )
     has_errors |= build_has_errors
-    combined_file, combined_file_metadata = building.merge_mapfiles(build_outfiles)
-    outfiles.append(combined_file)
-    outfiles.append(combined_file_metadata)
+    outfiles.extend(build_outfiles)
 
     osm_outfiles, osm_has_errors = do_build(
         state.osm_files, building.OSMStatus, building.OSM_ACTIONS, state, debug
