@@ -69,6 +69,19 @@ class State:
         if not self.has_window(): return ''
         return '{0[0]} {1[1]} {1[0]} {0[1]}'.format(self.get_window_upper_left(), self.get_window_lower_right())
 
+    def get_window_string_lowerleft_topright_cut(self, gdal_info):
+        if not self.has_window(): return ''
+        lowerleftX = max(self.get_window_upper_left()[0], gdal_info.minX)
+        lowerleftY = max(self.get_window_lower_right()[1], gdal_info.minY)
+        toprightX = min(self.get_window_lower_right()[0], gdal_info.maxX)
+        toprightY = min(self.get_window_upper_left()[1], gdal_info.maxY)
+
+        # If a projection window exists after trimming, return it. Otherwise return None.
+        if (lowerleftX < toprightX) and (lowerleftY < toprightY):
+            return '{} {} {} {}'.format(lowerleftX, lowerleftY, toprightX, toprightY)
+        else:
+            return None
+
     @classmethod
     def from_dict(cls, d):
         new_state = State()

@@ -93,22 +93,21 @@ def add_files(files, add_method_name):
 def do_build(files, statusclass, actions, state, debug = False):
     has_errors = False
     outfiles = []
-    for index, f in enumerate(files):
-        echoes.info('Processing {}...'.format(f))
-        buildstatus = statusclass(index, f, state)
-        errors = []
-        with click.progressbar(actions, bar_template=echoes.PROGRESS_BAR_TEMPLATE, show_eta=False) as bar:
-            for action in bar:
-                try:
-                    action(buildstatus, debug)
-                except Exception as e:
-                    errors.append(e)
-                    has_errors = True
-        if errors:
-            echoes.error('Exceptions caught when processing {}:'.format(f))
-            for e in errors:
-                echoes.error(e)
-        for line in str(buildstatus).split('\n'):
-            echoes.info(line)
-        outfiles.extend(buildstatus.get_result_files())
+    echoes.info('Processing...')
+    buildstatus = statusclass(0, files, state)
+    errors = []
+    with click.progressbar(actions, bar_template=echoes.PROGRESS_BAR_TEMPLATE, show_eta=False) as bar:
+        for action in bar:
+            try:
+                action(buildstatus, debug)
+            except Exception as e:
+                errors.append(e)
+                has_errors = True
+    if errors:
+        echoes.error('Exceptions caught:')
+        for e in errors:
+            echoes.error(e)
+    for line in str(buildstatus).split('\n'):
+        echoes.info(line)
+    outfiles.extend(buildstatus.get_result_files())
     return (outfiles, has_errors)
