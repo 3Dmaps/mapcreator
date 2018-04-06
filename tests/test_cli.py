@@ -156,24 +156,24 @@ def test_build_does_nothing_if_init_fails(mock_init):
 @patch('mapcreator.building.package')
 def test_build_works_correctly(mock_package):
     def check_action_a(status, debug):
-        assert status.index in range(3)
+        assert status.index == 0
         assert debug
-        status.current_file = status.current_file * 2
+        for f in map(lambda s: s*2, status.current_files):
+            status.add_next_file(f)
+        status.next()
     def check_action_b(status, debug):
-        file_to_index = {
-            'aa': 0,
-            'bb': 1,
-            'cc': 2,
-        }
-        assert file_to_index[status.current_file] == status.index
-        status.add_result_file(status.current_file)
-        status.add_result_file(status.current_file + '1')
+        assert len(status.current_files) == 3
+        files = ['aa', 'bb', 'cc']
+        for f in files: 
+            assert f in status.current_files
+            status.add_result_file(f)
+            status.add_result_file(f + '1')
     mapcreator.building.BUILD_ACTIONS = (check_action_a, check_action_b)
     runner = CliRunner()
     result = runner.invoke(cli, ['build', '-do', 'test2.zip'])
     assert result.exit_code == 0
     assert 'SUCCESS' in result.output
-    mock_package.assert_called_once_with('test2.zip', ['.test_mapcreator_build\\finalized\\heightfile_combined_bin.bin', '.test_mapcreator_build\\finalized\\heightfile_combined_bin.hdr'])
+    mock_package.assert_called_once_with('test2.zip', ['aa', 'aa1', 'bb', 'bb1', 'cc', 'cc1'])
 
 @patch('os.path.exists', lambda s: True)
 @patch('mapcreator.persistence.state_exists', lambda: True)
@@ -183,22 +183,20 @@ def test_build_works_correctly(mock_package):
 @patch('mapcreator.building.package')
 def test_build_throws_errors_correctly(mock_package):
     def check_action_a(status, debug):
-        assert status.index in range(3)
+        assert status.index == 0
         assert not debug
-        status.current_file = status.current_file * 2
+        for f in map(lambda s: s*2, status.current_files):
+            status.add_next_file(f)
+        status.next()
     def check_action_b(status, debug):
-        file_to_index = {
-            'aa': 0,
-            'bb': 1,
-            'cc': 2,
-        }
-        if status.current_file == 'bb':
-            raise ValueError('Oh no!')
-        if status.current_file == 'cc':
-            status.output.write('Hecking cool')
-        assert file_to_index[status.current_file] == status.index
-        status.add_result_file(status.current_file)
-        status.add_result_file(status.current_file + '1')
+        assert len(status.current_files) == 3
+        files = ['aa', 'bb', 'cc']
+        for f in files: 
+            assert f in status.current_files
+            status.add_result_file(f)
+            status.add_result_file(f + '1')
+        status.output.write('Hecking cool')
+        raise ValueError('Oh no!')
     mapcreator.building.BUILD_ACTIONS = (check_action_a, check_action_b)
     runner = CliRunner()
     result = runner.invoke(cli, ['build', '-fo', 'test2.zip'])
@@ -207,7 +205,7 @@ def test_build_throws_errors_correctly(mock_package):
     assert 'Hecking cool' in result.output
     assert 'Build done (but there were errors)' in result.output
     assert 'SUCCESS' not in result.output
-    mock_package.assert_called_once_with('test2.zip', ['.test_mapcreator_build\\finalized\\heightfile_combined_bin.bin', '.test_mapcreator_build\\finalized\\heightfile_combined_bin.hdr'])
+    mock_package.assert_called_once_with('test2.zip', ['aa', 'aa1', 'bb', 'bb1', 'cc', 'cc1'])
 
 @patch('mapcreator.persistence.state_exists', lambda: True)
 @patch('mapcreator.persistence.clear_state')
