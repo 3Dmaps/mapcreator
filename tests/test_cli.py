@@ -80,7 +80,7 @@ def test_add_osm_files(mock_add):
     assert result.exit_code == 0
 
 @patch('mapcreator.persistence.save_state')
-def test_add_satellite_files(mock_save):
+def test_add_zero_satellite_files(mock_save):
     runner = CliRunner()
     result = runner.invoke(cli, ['add_satellite_files'])
     mock_save.assert_not_called()
@@ -88,7 +88,7 @@ def test_add_satellite_files(mock_save):
     assert 'No files were specified.' in result.output
 
 @patch('mapcreator.cli.add_files')
-def test_add_osm_files(mock_add):
+def test_add_satellite_files(mock_add):
     runner = CliRunner()
     result = runner.invoke(cli, ['add_satellite_files', 'test1.tif', 'test2.tif'])
     mock_add.assert_called_once_with(('test1.tif', 'test2.tif'), 'add_satellite_file')
