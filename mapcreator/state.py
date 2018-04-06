@@ -11,6 +11,7 @@ class State:
     def __init__(self):
         self.height_files = []
         self.osm_files = []
+        self.satellite_files = []
     
     def has_height_files(self):
         return hasattr(self, 'height_files') and len(self.height_files) > 0
@@ -18,12 +19,18 @@ class State:
     def has_osm_files(self):
         return hasattr(self, 'osm_files') and len(self.osm_files) > 0
 
+    def has_satellite_files(self):
+        return hasattr(self, 'satellite_files') and len(self.satellite_files) > 0
+    
     def add_height_file(self, fpath):
         return State.add_file(fpath, self.height_files)
     
     def add_osm_file(self, fpath):
         return State.add_file(fpath, self.osm_files)
     
+    def add_satellite_file(self, fpath):
+        return State.add_file(fpath, self.satellite_files)
+
     @classmethod
     def add_file(cls, fpath, flist):
         truepath = path.abspath(fpath)
@@ -90,6 +97,11 @@ class State:
             lines.extend(State.file_list_to_lines(self.osm_files))
         else:
             lines.append('-No open street map files added.')
+        if self.has_satellite_files():
+            lines.append('-Satellite files:')
+            lines.extend(State.file_list_to_lines(self.satellite_files))
+        else:
+            lines.append('-No satellite files added.')
         if self.has_window():
             lines.append('-Window:')
             lines.append('--Upper left corner:  x={0[0]}, y={0[1]}'.format(self.get_window_upper_left()))
