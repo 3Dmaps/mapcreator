@@ -5,6 +5,7 @@ from os import path
 from mapcreator import building
 from mapcreator.building import BuildStatus
 from mapcreator.state import State
+from mapcreator.gdal_util import Gdalinfo
 from test_persistence import DummyState
 
 def setup_module(module):
@@ -66,63 +67,85 @@ def test_output_path_for_temp_file_with_new_extension():
 
 @mock.patch('mapcreator.building.call_command')
 def test_prepare(mock_call):
-    status = BuildStatus(0, 'test.txt', DummyState())
+    status = BuildStatus(0, ['test.txt', 'test2.txt'], DummyState())
     building.prepare(status)
     expected_command = 'gdal_translate -of GTiff test.txt {}'.format(building.get_output_path('test.txt', 'tiff'))
-    mock_call.assert_called_once_with(expected_command, status, False)
-    assert status.current_file == building.get_output_path('test.txt', 'tiff')
+    expected_command_2 = 'gdal_translate -of GTiff test2.txt {}'.format(building.get_output_path('test2.txt', 'tiff'))
+    mock_call.assert_any_call(expected_command, status, False)
+    mock_call.assert_any_call(expected_command_2, status, False)
+    assert status.current_files == [building.get_output_path('test.txt', 'tiff'), building.get_output_path('test2.txt', 'tiff')]
 
-""" DISABLED - MOCK TEST DATA DOESNT HAVE GDALINFO
+
 @mock.patch('mapcreator.building.call_command')
-def test_cut_projection_window(mock_call):
+@mock.patch('mapcreator.gdal_util.Gdalinfo.for_file')
+def test_cut_projection_window(mock_forfile, mock_call):
+    ginfo_for_testing = Gdalinfo()
+    ginfo_for_testing.minX = -99
+    ginfo_for_testing.minY = -99
+    ginfo_for_testing.maxX = 99
+    ginfo_for_testing.maxY = 3
+    mock_forfile.return_value = ginfo_for_testing
     state = State()
-    state.set_window(1, 2, 3, 4)
-    status = BuildStatus(0, 'test.txt', state)
+    state.set_window(0, 7, 2, 1)
+    status = BuildStatus(0, ['test.txt'], state)
     building.cut_projection_window(status)
-    expected_command = 'gdalwarp -te 1 4 3 2 test.txt {}'.format(building.get_output_path('test.txt'))
+    mock_forfile.assert_called_once_with('test.txt')
+    expected_command = 'gdalwarp -te 0 1 2 3 test.txt {}'.format(building.get_output_path('test.txt'))
     mock_call.assert_called_once_with(expected_command, status, False)
-    assert status.current_file == building.get_output_path('test.txt')
-"""
+    assert status.current_files == [building.get_output_path('test.txt')]
+
 
 @mock.patch('mapcreator.building.call_command')
 def test_cut_projection_window_when_no_window(mock_call):
-    status = BuildStatus(0, 'test.txt', State())
+    status = BuildStatus(0, ['test.txt', 'test2.txt'], State())
     building.cut_projection_window(status)
     mock_call.assert_not_called()
-    assert status.current_file == 'test.txt'
+    assert status.current_files == ['test.txt', 'test2.txt']
  
 @mock.patch('mapcreator.building.call_command')
 def test_reproject(mock_call):
-    status = BuildStatus(0, 'test.txt', DummyState())
+    test_files = ['test.txt', 'test2.txt', 'test3.txt']
+    status = BuildStatus(0, test_files, DummyState())
     building.reproject(status)
-    expected_command = 'gdalwarp -tr 10 10 -t_srs EPSG:3857 -r bilinear test.txt {}'.format(building.get_output_path('test.txt'))
-    mock_call.assert_called_once_with(expected_command, status, False)
-    assert status.current_file == building.get_output_path('test.txt')
+    for f in test_files:
+        expected_command = 'gdalwarp -tr 10 10 -t_srs EPSG:3857 -r bilinear {} {}'.format(f, building.get_output_path(f))
+        mock_call.assert_any_call(expected_command, status, False)
+    assert status.current_files == list(map(building.get_output_path, test_files))
 
-@mock.patch('mapcreator.building.call_command', side_effect=lambda a, b, c: open(building.get_output_path('test.txt', 'hdr'), 'w').close())
+@mock.patch('mapcreator.building.call_command')
 def test_translate(mock_call):
+    def add_mock_files(a, b, c):
+        open(building.get_output_path('test.txt', 'hdr'), 'w').close()
+        open(building.get_output_path('test2.txt', 'hdr'), 'w').close()
+    mock_call.side_effect = add_mock_files
     building.init_build()
-    status = BuildStatus(2, 'test.txt', DummyState())
+    status = BuildStatus(2, ['test.txt', 'test2.txt'], DummyState())
     building.translate(status)
     expected_command = 'gdal_translate -of ENVI test.txt {}'.format(building.get_output_path('test.txt', 'bin'))
-    mock_call.assert_called_once_with(expected_command, status, False)
-    assert status.current_file == building.get_output_path('test.txt', 'bin')
+    expected_command_2 = 'gdal_translate -of ENVI test2.txt {}'.format(building.get_output_path('test2.txt', 'bin'))
+    mock_call.assert_any_call(expected_command, status, False)
+    mock_call.assert_any_call(expected_command_2, status, False)
+    assert status.current_files == [building.get_output_path('test.txt', 'bin'), building.get_output_path('test2.txt', 'bin')]
     assert path.exists(path.join(building.FINALIZED_DIR, 'heightfile2.hdr'))
-    assert status.result_files == [path.join(building.FINALIZED_DIR, 'heightfile2.hdr')]
+    assert path.exists(path.join(building.FINALIZED_DIR, 'heightfile3.hdr'))
+    assert status.result_files == [path.join(building.FINALIZED_DIR, 'heightfile2.hdr'),
+                                   path.join(building.FINALIZED_DIR, 'heightfile3.hdr')]
 
 @mock.patch('mapcreator.building.rename')
 def test_finalize(mock_rename):
     building.init_build()
-    status = BuildStatus(99, 'test.txt', DummyState())
-    status.current_file = building.get_output_path('test.txt', 'bin')
+    status = BuildStatus(99, ['test.txt', 'test2.txt'], DummyState())
+    status.current_files = [building.get_output_path('test.txt', 'bin'), building.get_output_path('test2.txt', 'bin')]
     building.finalize(status)
-    mock_rename.assert_called_once_with(building.get_output_path('test.txt', 'bin'), path.join(building.FINALIZED_DIR, 'heightfile99.tiff'))
-    assert status.current_file == path.join(building.FINALIZED_DIR, 'heightfile99.tiff')
-    assert len(status.result_files) == 1
-    assert path.join(building.FINALIZED_DIR, 'heightfile99.tiff') in status.result_files
+    mock_rename.assert_any_call(building.get_output_path('test.txt', 'bin'), path.join(building.FINALIZED_DIR, 'heightfile99.bin'))
+    mock_rename.assert_any_call(building.get_output_path('test2.txt', 'bin'), path.join(building.FINALIZED_DIR, 'heightfile100.bin'))
+    assert status.current_files == [path.join(building.FINALIZED_DIR, 'heightfile99.bin'), path.join(building.FINALIZED_DIR, 'heightfile100.bin')]
+    assert len(status.result_files) == 2
+    assert path.join(building.FINALIZED_DIR, 'heightfile99.bin') in status.result_files
+    assert path.join(building.FINALIZED_DIR, 'heightfile100.bin') in status.result_files
 
 def test_finalize_when_no_changes():
-    status = BuildStatus(99, 'test.txt', DummyState())
+    status = BuildStatus(99, ['test.txt'], DummyState())
     try:
         building.finalize(status)
         assert False # Should have thrown an exception before this
