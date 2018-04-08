@@ -183,7 +183,7 @@ def test_build_works_correctly(mock_package):
             assert f in status.current_files
             status.add_result_file(f)
             status.add_result_file(f + '1')
-    mapcreator.building.BUILD_ACTIONS = (check_action_a, check_action_b)
+    mapcreator.building.HEIGHTMAP_ACTIONS = (check_action_a, check_action_b)
     runner = CliRunner()
     result = runner.invoke(cli, ['build', '-do', 'test2.zip'])
     assert result.exit_code == 0
@@ -212,7 +212,7 @@ def test_build_throws_errors_correctly(mock_package):
             status.add_result_file(f + '1')
         status.output.write('Hecking cool')
         raise ValueError('Oh no!')
-    mapcreator.building.BUILD_ACTIONS = (check_action_a, check_action_b)
+    mapcreator.building.HEIGHTMAP_ACTIONS = (check_action_a, check_action_b)
     runner = CliRunner()
     result = runner.invoke(cli, ['build', '-fo', 'test2.zip'])
     assert result.exit_code == 0

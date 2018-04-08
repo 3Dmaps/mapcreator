@@ -82,10 +82,10 @@ def set_window(ulx, uly, lrx, lry):
     Specifies projection subwindow. 
     Uses upper left (ulx, uly) and lower right (lrx, lry) corners.
 
-    If any of the coordinates is negative, you'll need to seperate the arguments from the command
+    If any of the coordinates is negative, you'll need to separate the arguments from the command
     with a double dash; for example
     
-    mapcreator set_window -- 110.3 -13.2 110.5 -12.1
+    mapcreator set_window -- 110.3 -12.1 110.5 -13.2
     """
     state = load_or_error()
     if not state: return
@@ -128,17 +128,23 @@ def build(output, force, debug, clean):
     outfiles = []
     has_errors = False
 
-    build_outfiles, build_has_errors = do_build(
-        state.height_files, building.BuildStatus, building.BUILD_ACTIONS, state, debug
+    heightmap_outfiles, heightmap_has_errors = do_build(
+        state.height_files, building.HeightMapStatus, building.HEIGHTMAP_ACTIONS, state, debug
         )
-    has_errors |= build_has_errors
-    outfiles.extend(build_outfiles)
+    has_errors |= heightmap_has_errors
+    outfiles.extend(heightmap_outfiles)
 
     osm_outfiles, osm_has_errors = do_build(
         state.osm_files, building.OSMStatus, building.OSM_ACTIONS, state, debug
     )
     has_errors |= osm_has_errors
     outfiles.extend(osm_outfiles)
+
+    satellite_outfiles, satellite_has_errors = do_build(
+        state.satellite_files, building.SatelliteStatus, building.SATELLITE_ACTIONS, state, debug
+    )
+    has_errors |= satellite_has_errors
+    outfiles.extend(satellite_outfiles)
 
     info('Building package...')
     try:
