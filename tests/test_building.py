@@ -144,17 +144,46 @@ def test_finalize(mock_rename):
     assert path.join(building.FINALIZED_DIR, 'heightfile99.bin') in status.result_files
     assert path.join(building.FINALIZED_DIR, 'heightfile100.bin') in status.result_files
 
-@mock.patch('mapcreator.gdal_util.Gdalinfo.for_file', lambda: {'minX': 0, 'minY': 0, 'maxX': 1, 'maxY': 1})
-@mock.patch('mapcreator.state.State.get_window_string_lowerleft_topright_cut', lambda: '0 0 1 1')
-@mock.patch('mapcreator.state.State.get_window_string_lowerleft_topright', lambda: '0 0 1 1')
 @mock.patch('mapcreator.building.call_command')
-def test_process_satellite_with_gdal(mock_call):
-    status = SatelliteStatus(0, ['test.tif', 'test2.tif'], DummyState())
+@mock.patch('mapcreator.gdal_util.Gdalinfo.for_file')
+def test_process_satellite_with_gdal(mock_forfile, mock_call):
+    ginfo_for_testing = Gdalinfo()
+    ginfo_for_testing.minX = -99
+    ginfo_for_testing.minY = -99
+    ginfo_for_testing.maxX = 99
+    ginfo_for_testing.maxY = 99
+    mock_forfile.return_value = ginfo_for_testing
+    state = State()
+    state.set_window(0, 7, 2, 1)
+    
+    status = SatelliteStatus(0, ['test.tif', 'test2.tif'], state)
     building.process_satellite_with_gdal(status)
+    mock_forfile.assert_any_call('test.tif')
+    mock_forfile.assert_any_call('test2.tif')
     outpath = path.join(building.FINALIZED_DIR, building.FINAL_SATELLITE_FORMAT.format(0))
-    expected_command = 'gdalwarp -tr 10 10 -te_srs EPSG:4326 -t_srs EPSG:3857 -r bilinear -te test.tif test2.tif {}'.format(outpath)
-    mock_call.assert_any_call(expected_command, status, False)
+    expected_command = 'gdalwarp -tr 10 10 -te_srs EPSG:4326 -t_srs EPSG:3857 -r bilinear -te 0 1 2 7 test.tif test2.tif {}'.format(outpath)
+    
+    mock_call.assert_called_once_with(expected_command, status, False)
     assert status.result_files == [outpath]
+
+@mock.patch('mapcreator.building.call_command')
+@mock.patch('mapcreator.gdal_util.Gdalinfo.for_file')
+def test_process_satellite_with_no_images_in_window(mock_forfile, mock_call):
+    ginfo_for_testing = Gdalinfo()
+    ginfo_for_testing.minX = 10
+    ginfo_for_testing.minY = 10
+    ginfo_for_testing.maxX = 99
+    ginfo_for_testing.maxY = 99
+    mock_forfile.return_value = ginfo_for_testing
+    state = State()
+    state.set_window(0, 7, 2, 1)
+    
+    status = SatelliteStatus(0, ['test.tif', 'test2.tif'], state)
+    building.process_satellite_with_gdal(status)
+    mock_forfile.assert_any_call('test.tif')
+    mock_forfile.assert_any_call('test2.tif')
+    mock_call.assert_not_called()
+    assert status.result_files == []
 
 def test_finalize_when_no_changes():
     status = HeightMapStatus(99, ['test.txt'], DummyState())
