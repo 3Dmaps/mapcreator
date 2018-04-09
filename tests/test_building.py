@@ -160,11 +160,10 @@ def test_process_satellite_with_gdal(mock_forfile, mock_call):
     building.process_satellite_with_gdal(status)
     mock_forfile.assert_any_call('test.tif')
     mock_forfile.assert_any_call('test2.tif')
-    outpath = path.join(building.FINALIZED_DIR, building.FINAL_SATELLITE_FORMAT.format(0))
+    outpath = path.join(building.FINALIZED_DIR, building.INTERMEDIATE_SATELLITE_FORMAT.format(0))
     expected_command = 'gdalwarp -tr 10 10 -te_srs EPSG:4326 -t_srs EPSG:3857 -r bilinear -te 0 1 2 7 test.tif test2.tif {}'.format(outpath)
-    
     mock_call.assert_called_once_with(expected_command, status, False)
-    assert status.result_files == [outpath]
+    assert status.intermediate_files == [outpath]
 
 @mock.patch('mapcreator.building.call_command')
 @mock.patch('mapcreator.gdal_util.Gdalinfo.for_file')
@@ -184,6 +183,18 @@ def test_process_satellite_with_no_images_in_window(mock_forfile, mock_call):
     mock_forfile.assert_any_call('test2.tif')
     mock_call.assert_not_called()
     assert status.result_files == []
+
+@mock.patch('mapcreator.building.call_command')
+def test_translate_satellite_to_png(mock_call):
+    state = State()
+    status = SatelliteStatus(0, ['test.tif', 'test2.tif'], state)
+    status.add_intermediate_file('intermediate.tiff')
+    building.translate_satellite_to_png(status)
+    
+    outpath = path.join(building.FINALIZED_DIR, building.FINAL_SATELLITE_FORMAT.format(0))
+    expected_command = 'gdal_translate -of {} {} {}'.format(building.SATELLITE_OUTPUT_FORMAT, 'intermediate.tiff', outpath)
+    mock_call.assert_called_once_with(expected_command, status, False)
+    assert status.result_files == [outpath]
 
 def test_finalize_when_no_changes():
     status = HeightMapStatus(99, ['test.txt'], DummyState())
