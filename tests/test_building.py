@@ -3,7 +3,7 @@ import shutil
 import subprocess
 from os import path
 from mapcreator import building
-from mapcreator.building import HeightMapStatus
+from mapcreator.building import HeightMapStatus, SatelliteStatus
 from mapcreator.state import State
 from mapcreator.gdal_util import Gdalinfo
 from test_persistence import DummyState
@@ -144,12 +144,24 @@ def test_finalize(mock_rename):
     assert path.join(building.FINALIZED_DIR, 'heightfile99.bin') in status.result_files
     assert path.join(building.FINALIZED_DIR, 'heightfile100.bin') in status.result_files
 
+@mock.patch('mapcreator.gdal_util.Gdalinfo.for_file', lambda: {'minX': 0, 'minY': 0, 'maxX': 1, 'maxY': 1})
+@mock.patch('mapcreator.state.State.get_window_string_lowerleft_topright_cut', lambda: '0 0 1 1')
+@mock.patch('mapcreator.state.State.get_window_string_lowerleft_topright', lambda: '0 0 1 1')
+@mock.patch('mapcreator.building.call_command')
+def test_process_satellite_with_gdal(mock_call):
+    status = SatelliteStatus(0, ['test.tif', 'test2.tif'], DummyState())
+    building.process_satellite_with_gdal(status)
+    outpath = path.join(building.FINALIZED_DIR, building.FINAL_SATELLITE_FORMAT.format(0))
+    expected_command = 'gdalwarp -tr 10 10 -te_srs EPSG:4326 -t_srs EPSG:3857 -r bilinear -te test.tif test2.tif {}'.format(outpath)
+    mock_call.assert_any_call(expected_command, status, False)
+    assert status.result_files == [outpath]
+
 def test_finalize_when_no_changes():
     status = HeightMapStatus(99, ['test.txt'], DummyState())
     try:
         building.finalize(status)
         assert False # Should have thrown an exception before this
-    except RuntimeError:
+    except FileNotFoundError:
         pass
     except:
         assert False # Wrong kind of an error thrown
