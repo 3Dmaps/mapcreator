@@ -3,7 +3,7 @@ import shutil
 import subprocess
 from os import path
 from mapcreator import building
-from mapcreator.building import BuildStatus
+from mapcreator.building import HeightMapStatus, SatelliteStatus
 from mapcreator.state import State
 from mapcreator.gdal_util import Gdalinfo
 from test_persistence import DummyState
@@ -14,7 +14,7 @@ def setup_module(module):
 
 @mock.patch('subprocess.Popen')
 def test_call_command_with_debug(mock_popen):
-    status = BuildStatus(0, 'test.txt', DummyState())
+    status = HeightMapStatus(0, 'test.txt', DummyState())
     mock_popen.return_value.__enter__.return_value.communicate.return_value = (b'test output', b'test error')
     building.call_command('mycommand -abc', status, True)
     mock_popen.assert_called_once_with('mycommand -abc', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -24,7 +24,7 @@ def test_call_command_with_debug(mock_popen):
 
 @mock.patch('subprocess.Popen')
 def test_call_command_no_debug(mock_popen):
-    status = BuildStatus(0, 'test.txt', DummyState())
+    status = HeightMapStatus(0, 'test.txt', DummyState())
     mock_popen.return_value.__enter__.return_value.communicate.return_value = (b'test output', b'test error')
     building.call_command('mycommand --do-test -- -1 2 3', status, False)
     mock_popen.assert_called_once_with('mycommand --do-test -- -1 2 3', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -67,7 +67,7 @@ def test_output_path_for_temp_file_with_new_extension():
 
 @mock.patch('mapcreator.building.call_command')
 def test_prepare(mock_call):
-    status = BuildStatus(0, ['test.txt', 'test2.txt'], DummyState())
+    status = HeightMapStatus(0, ['test.txt', 'test2.txt'], DummyState())
     building.prepare(status)
     expected_command = 'gdal_translate -of GTiff test.txt {}'.format(building.get_output_path('test.txt', 'tiff'))
     expected_command_2 = 'gdal_translate -of GTiff test2.txt {}'.format(building.get_output_path('test2.txt', 'tiff'))
@@ -87,7 +87,7 @@ def test_cut_projection_window(mock_forfile, mock_call):
     mock_forfile.return_value = ginfo_for_testing
     state = State()
     state.set_window(0, 7, 2, 1)
-    status = BuildStatus(0, ['test.txt'], state)
+    status = HeightMapStatus(0, ['test.txt'], state)
     building.cut_projection_window(status)
     mock_forfile.assert_called_once_with('test.txt')
     expected_command = 'gdalwarp -te 0 1 2 3 test.txt {}'.format(building.get_output_path('test.txt'))
@@ -97,7 +97,7 @@ def test_cut_projection_window(mock_forfile, mock_call):
 
 @mock.patch('mapcreator.building.call_command')
 def test_cut_projection_window_when_no_window(mock_call):
-    status = BuildStatus(0, ['test.txt', 'test2.txt'], State())
+    status = HeightMapStatus(0, ['test.txt', 'test2.txt'], State())
     building.cut_projection_window(status)
     mock_call.assert_not_called()
     assert status.current_files == ['test.txt', 'test2.txt']
@@ -105,7 +105,7 @@ def test_cut_projection_window_when_no_window(mock_call):
 @mock.patch('mapcreator.building.call_command')
 def test_reproject(mock_call):
     test_files = ['test.txt', 'test2.txt', 'test3.txt']
-    status = BuildStatus(0, test_files, DummyState())
+    status = HeightMapStatus(0, test_files, DummyState())
     building.reproject(status)
     for f in test_files:
         expected_command = 'gdalwarp -tr 10 10 -t_srs EPSG:3857 -r bilinear {} {}'.format(f, building.get_output_path(f))
@@ -119,7 +119,7 @@ def test_translate(mock_call):
         open(building.get_output_path('test2.txt', 'hdr'), 'w').close()
     mock_call.side_effect = add_mock_files
     building.init_build()
-    status = BuildStatus(2, ['test.txt', 'test2.txt'], DummyState())
+    status = HeightMapStatus(2, ['test.txt', 'test2.txt'], DummyState())
     building.translate(status)
     expected_command = 'gdal_translate -of ENVI test.txt {}'.format(building.get_output_path('test.txt', 'bin'))
     expected_command_2 = 'gdal_translate -of ENVI test2.txt {}'.format(building.get_output_path('test2.txt', 'bin'))
@@ -134,7 +134,7 @@ def test_translate(mock_call):
 @mock.patch('mapcreator.building.rename')
 def test_finalize(mock_rename):
     building.init_build()
-    status = BuildStatus(99, ['test.txt', 'test2.txt'], DummyState())
+    status = HeightMapStatus(99, ['test.txt', 'test2.txt'], DummyState())
     status.current_files = [building.get_output_path('test.txt', 'bin'), building.get_output_path('test2.txt', 'bin')]
     building.finalize(status)
     mock_rename.assert_any_call(building.get_output_path('test.txt', 'bin'), path.join(building.FINALIZED_DIR, 'heightfile99.bin'))
@@ -144,8 +144,60 @@ def test_finalize(mock_rename):
     assert path.join(building.FINALIZED_DIR, 'heightfile99.bin') in status.result_files
     assert path.join(building.FINALIZED_DIR, 'heightfile100.bin') in status.result_files
 
+@mock.patch('mapcreator.building.call_command')
+@mock.patch('mapcreator.gdal_util.Gdalinfo.for_file')
+def test_process_satellite_with_gdal(mock_forfile, mock_call):
+    ginfo_for_testing = Gdalinfo()
+    ginfo_for_testing.minX = -99
+    ginfo_for_testing.minY = -99
+    ginfo_for_testing.maxX = 99
+    ginfo_for_testing.maxY = 99
+    mock_forfile.return_value = ginfo_for_testing
+    state = State()
+    state.set_window(0, 7, 2, 1)
+    
+    status = SatelliteStatus(0, ['test.tif', 'test2.tif'], state)
+    building.process_satellite_with_gdal(status)
+    mock_forfile.assert_any_call('test.tif')
+    mock_forfile.assert_any_call('test2.tif')
+    outpath = path.join(building.FINALIZED_DIR, building.INTERMEDIATE_SATELLITE_FORMAT.format(0))
+    expected_command = 'gdalwarp -tr 10 10 -te_srs EPSG:4326 -t_srs EPSG:3857 -r bilinear -te 0 1 2 7 test.tif test2.tif {}'.format(outpath)
+    mock_call.assert_called_once_with(expected_command, status, False)
+    assert status.intermediate_files == [outpath]
+
+@mock.patch('mapcreator.building.call_command')
+@mock.patch('mapcreator.gdal_util.Gdalinfo.for_file')
+def test_process_satellite_with_no_images_in_window(mock_forfile, mock_call):
+    ginfo_for_testing = Gdalinfo()
+    ginfo_for_testing.minX = 10
+    ginfo_for_testing.minY = 10
+    ginfo_for_testing.maxX = 99
+    ginfo_for_testing.maxY = 99
+    mock_forfile.return_value = ginfo_for_testing
+    state = State()
+    state.set_window(0, 7, 2, 1)
+    
+    status = SatelliteStatus(0, ['test.tif', 'test2.tif'], state)
+    building.process_satellite_with_gdal(status)
+    mock_forfile.assert_any_call('test.tif')
+    mock_forfile.assert_any_call('test2.tif')
+    mock_call.assert_not_called()
+    assert status.result_files == []
+
+@mock.patch('mapcreator.building.call_command')
+def test_translate_satellite_to_png(mock_call):
+    state = State()
+    status = SatelliteStatus(0, ['test.tif', 'test2.tif'], state)
+    status.add_intermediate_file('intermediate.tiff')
+    building.translate_satellite_to_png(status)
+    
+    outpath = path.join(building.FINALIZED_DIR, building.FINAL_SATELLITE_FORMAT.format(0))
+    expected_command = 'gdal_translate -of {} {} {}'.format(building.SATELLITE_OUTPUT_FORMAT, 'intermediate.tiff', outpath)
+    mock_call.assert_called_once_with(expected_command, status, False)
+    assert status.result_files == [outpath]
+
 def test_finalize_when_no_changes():
-    status = BuildStatus(99, ['test.txt'], DummyState())
+    status = HeightMapStatus(99, ['test.txt'], DummyState())
     try:
         building.finalize(status)
         assert False # Should have thrown an exception before this

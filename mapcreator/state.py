@@ -43,7 +43,7 @@ class State:
             return FileAddResult.SUCCESS
     
     def has_window(self):
-        return hasattr(self, 'window')
+        return hasattr(self, 'window') and len(self.window) > 0
 
     def set_window(self, ulx, uly, lrx, lry):
         self.window = {
