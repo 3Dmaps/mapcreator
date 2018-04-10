@@ -141,6 +141,30 @@ def test_build_does_nothing_if_state_fails_load(mock_init, mock_load):
 
 @patch('os.path.exists', lambda s: False)
 @patch('mapcreator.persistence.state_exists', lambda: True)
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch('mapcreator.building.init_build', side_effect = RuntimeError('Shouldn\'t have run this!'))
+def test_build_does_nothing_if_state_has_no_files(mock_init):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['build'])
+    assert result.exit_code == 0
+    assert 'No files have been added to the current project' in result.output
+    assert 'STARTING BUILD' not in result.output
+    mock_init.assert_not_called()
+
+@patch('os.path.exists', lambda s: False)
+@patch('mapcreator.persistence.state_exists', lambda: True)
+@patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b'], 'osm_files': [], 'satellite_files': []}))
+@patch('mapcreator.building.init_build', side_effect = RuntimeError('Shouldn\'t have run this!'))
+def test_build_does_nothing_if_state_has_no_window(mock_init):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['build'])
+    assert result.exit_code == 0
+    assert 'No window has been set for the current project' in result.output
+    assert 'STARTING BUILD' not in result.output
+    mock_init.assert_not_called()
+
+@patch('os.path.exists', lambda s: False)
+@patch('mapcreator.persistence.state_exists', lambda: True)
 @patch('mapcreator.persistence.load_state', lambda: State.from_dict({'height_files': ['a', 'b'], 'osm_files': [], 'satellite_files': [], 'window': {'ulx': 0, 'uly': 1, 'lrx': 1, 'lry': 0}}))
 @patch('mapcreator.building.init_build', side_effect = OSError('Shouldn\'t have run this!'))
 def test_build_does_nothing_if_init_fails(mock_init):
