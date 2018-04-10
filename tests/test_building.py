@@ -201,7 +201,7 @@ def test_finalize_when_no_changes():
     try:
         building.finalize(status)
         assert False # Should have thrown an exception before this
-    except FileNotFoundError:
+    except RuntimeError:
         pass
     except:
         assert False # Wrong kind of an error thrown

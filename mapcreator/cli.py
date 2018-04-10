@@ -116,10 +116,13 @@ def build(output, force, debug, clean):
         return
     state = load_or_error()
     if not state: return
-    if not state.has_height_files():
-        error('No height files have been added to the current project! There\'s nothing to build!')
+    if not (state.has_height_files() or state.has_osm_files() or state.has_satellite_files()):
+        error('No files have been added to the current project! There\'s nothing to build!')
         return
-    
+    if not state.has_window():
+        error('No window has been set for the current project! Window must be set in order to build.')
+        return
+
     if not build_init_or_error(): return
 
     highlight('STARTING BUILD')

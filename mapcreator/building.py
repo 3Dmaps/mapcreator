@@ -89,14 +89,18 @@ class HeightMapStatus:
         self.metaindex += 1
         return ret
     def __str__(self):
-        lines = ['Build results for {}:'.format(', '.join(map(path.basename, self.original_files)))]
-        if self.result_files:
-            lines.append('-Files created: {}'.format(', '.join(map(path.basename, self.result_files))))
+        lines = []
+        if self.original_files == []:
+            lines.append('No height files were processed.')
         else:
-            lines.append('-No files were created')
-        if self.output.getvalue():
-            lines.append('-Messages from GDAL:')
-            lines.extend(self.output.getvalue().split('\n'))
+            lines.append('Build results for {}:'.format(', '.join(map(path.basename, self.original_files))))
+            if self.result_files:
+                lines.append('-Files created: {}'.format(', '.join(map(path.basename, self.result_files))))
+            else:
+                lines.append('-No files were created')
+            if self.output.getvalue():
+                lines.append('-Messages from GDAL:')
+                lines.extend(self.output.getvalue().split('\n'))
         return '\n'.join(lines)
 
 def get_output_path(input_path, new_extension = ''):
@@ -172,8 +176,10 @@ def translate(buildstatus, debug = False):
     buildstatus.next()
 
 def finalize(buildstatus, debug = False):
-    #if not buildstatus.current_files:
-    #    raise RuntimeError('No actions have been done --> Not finalizing anything')
+    if buildstatus.original_files == []:
+        return
+    if buildstatus.current_files == buildstatus.original_files:
+        raise RuntimeError('Errors detected in heightmap file processing --> Not finalizing anything')
     for cf in buildstatus.current_files:
         final_filename = FINAL_HEIGHT_FILENAME_FORMAT.format(buildstatus.get_index())
         final_path = path.join(FINALIZED_DIR, final_filename)
@@ -257,14 +263,18 @@ class SatelliteStatus:
         return self.result_files
     
     def __str__(self):
-        lines = ['Build results for {}:'.format(', '.join(map(path.basename, self.original_files)))]
-        if self.result_files:
-            lines.append('-Files created: {}'.format(', '.join(map(path.basename, self.result_files))))
+        lines = []
+        if self.original_files == []:
+            lines.append('No satellite files were processed.')
         else:
-            lines.append('-No files were created')
-        if self.output.getvalue():
-            lines.append('-Messages from GDAL:')
-            lines.extend(self.output.getvalue().split('\n'))
+            lines.append('Build results for {}:'.format(', '.join(map(path.basename, self.original_files))))
+            if self.result_files:
+                lines.append('-Files created: {}'.format(', '.join(map(path.basename, self.result_files))))
+            else:
+                lines.append('-No files were created')
+            if self.output.getvalue():
+                lines.append('-Messages from GDAL:')
+                lines.extend(self.output.getvalue().split('\n'))
         return '\n'.join(lines)
 
 def process_satellite_with_gdal(satellitestatus, debug = False):
