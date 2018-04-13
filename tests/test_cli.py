@@ -183,16 +183,14 @@ def test_build_does_nothing_if_init_fails(mock_init):
 @patch('mapcreator.building.package')
 def test_build_works_correctly(mock_package):
     def check_action_a(status, debug):
-        assert status.index == 0
         assert debug
-        for f in map(lambda s: s*2, status.current_files):
-            status.add_next_file(f)
-        status.next()
+        status.add_intermediate_file('intermediate.tif')
     def check_action_b(status, debug):
-        assert len(status.current_files) == 3
-        files = ['aa', 'bb', 'cc']
+        assert len(status.original_files) == 3
+        assert len(status.intermediate_files) == 1
+        files = ['a', 'b', 'c']
         for f in files: 
-            assert f in status.current_files
+            assert f in status.original_files
             status.add_result_file(f)
             status.add_result_file(f + '1')
     mapcreator.building.HEIGHTMAP_ACTIONS = (check_action_a, check_action_b)
@@ -200,7 +198,7 @@ def test_build_works_correctly(mock_package):
     result = runner.invoke(cli, ['build', '-do', 'test2.zip'])
     assert result.exit_code == 0
     assert 'SUCCESS' in result.output
-    mock_package.assert_called_once_with('test2.zip', ['aa', 'aa1', 'bb', 'bb1', 'cc', 'cc1'])
+    mock_package.assert_called_once_with('test2.zip', ['a', 'a1', 'b', 'b1', 'c', 'c1'])
 
 @patch('os.path.exists', lambda s: True)
 @patch('mapcreator.persistence.state_exists', lambda: True)
@@ -210,16 +208,13 @@ def test_build_works_correctly(mock_package):
 @patch('mapcreator.building.package')
 def test_build_throws_errors_correctly(mock_package):
     def check_action_a(status, debug):
-        assert status.index == 0
         assert not debug
-        for f in map(lambda s: s*2, status.current_files):
-            status.add_next_file(f)
-        status.next()
+        status.add_intermediate_file('intermediate.tif')
     def check_action_b(status, debug):
-        assert len(status.current_files) == 3
+        assert len(status.original_files) == 3
+        assert len(status.intermediate_files) == 1
         files = ['aa', 'bb', 'cc']
         for f in files: 
-            assert f in status.current_files
             status.add_result_file(f)
             status.add_result_file(f + '1')
         status.output.write('Hecking cool')

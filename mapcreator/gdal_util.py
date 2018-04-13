@@ -9,6 +9,12 @@ class Gdalinfo:
             gdal_info_dict = json.loads(stdout.decode('utf-8'))
             gdal_info = Gdalinfo()
             gdal_info_coordinates = gdal_info_dict['wgs84Extent']['coordinates'][0]
+            #gdal_info_coordinateSystemInfo = gdal_info_dict['coordinateSystem']['wkt']
+            #gdal_info_coordinateSystem = gdal_info_coordinateSystemInfo.rindex('AUTHORITY:')
+            #print("Rindex of AUTHORITY : " + gdal_info_coordinateSystem)
+            #print("Whole string: " + gdal_info_coordinateSystemInfo)
+            #print()
+
             minX = gdal_info_coordinates[0][0]
             minY = gdal_info_coordinates[0][1]
             maxX = gdal_info_coordinates[0][0]
