@@ -14,6 +14,7 @@ def cli():
     An utility for creating correctly formatted data for the 3Dmaps application.
 
     To get more information of what some command does, try
+    
     mapcreator [command] --help
 
     Part of Software production project course, Spring 2018, University of Helsinki.
@@ -71,6 +72,99 @@ def add_satellite_files(files):
         info('Try mapcreator add_satellite_files [file 1] [file 2] ... [file n]')
         return
     add_files(files, 'add_satellite_file')
+
+@click.command()
+@click.argument('tag')
+@click.argument('red', type=int)
+@click.argument('green', type=int)
+@click.argument('blue', type=int)
+def add_area_color(tag, red, green, blue):
+    """
+    Adds one area color for OSM data.
+    """
+    state = load_or_error()
+    if not state: return
+    if not validate_color(red, green, blue): return
+    state.add_area_color(tag, red, green, blue)
+    if save_or_error(state):
+        success('Color for "{}" set to {}!'.format(tag, (red, green, blue)))
+
+@click.command()
+@click.option('--debug', '-d', is_flag=True, help='Causes additional information to be printed on error')
+def add_area_colors(debug):
+    """
+    Adds multiple area colors for OSM data.
+
+    The colors should be inputted one color per line in the following format:
+
+    TAG RED GREEN BLUE
+
+    where TAG is OSM landuse value and RED, GREEN and BLUE are the color's RGB value
+    (each of them an integer between 0 and 255). For example
+
+    meadow 10 200 10\n
+    forest 20 100 20
+
+    The command reads lines until a blank line or an EOF is encountered.
+    You can either input the lines straight into the terminal, or use piping:
+
+    echo colors > mapcreator add_area_colors
+    """
+    state = load_or_error()
+    if not state: return
+    has_errors = False
+    count = 0
+    total = 0
+    info("Input colors one per line in format TAG RED GREEN BLUE")
+    info("Empty line stops reading.")
+    while True:
+        try:
+            line = prettyinput()
+        except EOFError:
+            break
+        if line == '': break
+        total += 1
+        args = parse_color(line, debug)
+        if not args:
+            has_errors = True
+            continue
+        if not validate_color(*args[1:]):
+            has_errors = True
+            continue
+        state.add_area_color(*args)
+        count += 1
+    if count == 0:
+        if has_errors:
+            warn("No colors were added!")
+        else:
+            info("No data was given")
+    else:
+        if not save_or_error(state): return
+        if has_errors:
+            warn("{} colors were added".format(count))
+            warn("(out of total {} lines given)".format(total))
+        else:
+            success("{} colors were added!".format(count))
+        
+@click.command()
+@click.option('--technical', '-t', is_flag=True, help='Outputs colors in less readable format that can be used to input colors')
+def show_area_colors(technical):
+    """
+    Lists area colors.
+    """
+    state = load_or_error()
+    if not state: return
+    output_func = info if not technical else print
+    line_format = "-Color for {}: R={}, G={}, B={}" if not technical else "{} {} {} {}"
+    if not state.has_area_colors():
+        output_func("No area colors set!" if not technical else "")
+    if not technical: highlight("Area colors:")
+    for tag in state.area_colors:
+        r, g, b = state.area_colors[tag]
+        output_func(line_format.format(tag, r, g, b))
+    if technical:
+        output_func('')
+        
 
 @click.command()
 @click.argument('ulx', type=float)
@@ -238,11 +332,14 @@ cli.add_command(hello)
 cli.add_command(init)
 cli.add_command(add_height_files)
 cli.add_command(add_satellite_files)
+cli.add_command(add_area_color)
+cli.add_command(add_area_colors)
 cli.add_command(add_osm_files)
 cli.add_command(set_window)
 cli.add_command(set_height_system)
 cli.add_command(set_satellite_system)
 cli.add_command(status)
+cli.add_command(show_area_colors)
 cli.add_command(reset)
 cli.add_command(build)
 cli.add_command(clean_temp_files)
