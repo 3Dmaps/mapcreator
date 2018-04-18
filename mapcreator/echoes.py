@@ -24,3 +24,6 @@ def error(s):
 
 def success(s):
     click.secho(format_echo('SUCCESS', s), bg='green')
+
+def prettyinput():
+    return input(' '*(IDENTIFIER_SIZE + 2))

@@ -12,6 +12,7 @@ class State:
         self.height_files = []
         self.osm_files = []
         self.satellite_files = []
+        self.area_colors = {}
     
     def has_height_files(self):
         return hasattr(self, 'height_files') and len(self.height_files) > 0
@@ -41,6 +42,15 @@ class State:
         else:
             flist.append(truepath)
             return FileAddResult.SUCCESS
+    
+    def has_area_colors(self):
+        return hasattr(self, 'area_colors') and len(self.area_colors) > 0
+    
+    def add_area_color(self, tag, r, g, b):
+        self.area_colors[tag] = (r, g, b)
+    
+    def clear_area_colors(self):
+        self.area_colors = {}
     
     def has_window(self):
         return hasattr(self, 'window') and len(self.window) > 0
@@ -137,6 +147,14 @@ class State:
         if self.has_height_system():
             lines.append('-Forced source height file coordinate system: {}'.format(self.height_coordinatesystem))
         if self.has_satellite_system():
-            lines.append('-Forced source satellite/aerial file coordinate system: {}'.format(self.height_coordinatesystem))
-            
+            lines.append('-Forced source satellite/aerial file coordinate system: {}'.format(self.height_coordinatesystem))        
+        if self.has_area_colors():
+            if len(self.area_colors) > 5:
+                lines.append('-There are {} area colors set'.format(len(self.area_colors)))
+            else:
+                lines.append('-Area colors:')
+                for tag in self.area_colors:
+                    lines.append('--Color for {} is {}'.format(tag, self.area_colors[tag]))
+        else:
+            lines.append('-No area colors set')
         return '\n'.join(lines)

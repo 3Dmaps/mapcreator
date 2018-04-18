@@ -90,6 +90,32 @@ def add_files(files, add_method_name):
     else:
         echoes.warn('No files were added.')
 
+def parse_color(line, debug = False):
+    PARSER = [str, int, int, int]
+    parts = line.split(' ')
+    if len(parts) != len(PARSER):
+        echoes.error("Invalid number of arguments on a line!")
+        echoes.error("(Should be {}, was {})".format(len(PARSER), len(parts)))
+        if debug: echoes.info("Line was: {}".format(line))
+        return None
+    try:
+        for i, func in enumerate(PARSER):
+            parts[i] = func(parts[i])
+    except ValueError as e:
+        echoes.error("Invalid color format!")
+        echoes.error("({})".format(e))
+        if debug: echoes.info("Line was: {}".format(line))
+        return None
+    return parts
+
+def validate_color(r, g, b):
+    for value in (r, g, b):
+        if value < 0 or value > 255:
+            echoes.error("Invalid color value {}!".format(value))
+            echoes.info("(Should be between 0 and 255)")
+            return False
+    return True
+
 def do_build(files, statusclass, actions, state, debug = False):
     has_errors = False
     outfiles = []
