@@ -74,4 +74,16 @@ def test_window_string():
     assert nums[2] == 1
     assert nums[3] == 2
 
-    
+def test_has_height_system():
+    state = State()
+    assert not state.has_height_system()
+    state.set_height_system('EPSG:1234')
+    assert state.has_height_system()
+
+def test_has_satellite_system():
+    state = State()
+    assert not state.has_satellite_system()
+    state.set_satellite_system('EPSG:12345')
+    assert state.has_satellite_system()
+
+  
