@@ -105,6 +105,26 @@ def test_check_projection_window_when_no_window(mock_call):
     assert status.current_files == []
  
 @mock.patch('mapcreator.building.call_command')
+def test_process_heightfiles_with_gdal(mock_call):
+    state = State()
+    state.set_window(0, 7, 2, 1)
+    status = HeightMapStatus(0, ['test.txt'], state)
+    building.process_heightfiles_with_gdal(status)
+    outpath = path.join(building.BUILD_DIR, building.INTERMEDIATE_HEIGHT_FILENAME)
+    expected_command = 'gdalwarp -tr 10 10 -te_srs EPSG:4326 -t_srs EPSG:3857 -r bilinear -te 0 1 2 7 test.txt {}'.format(outpath)
+    mock_call.assert_called_once_with(expected_command, status, False)
+    assert status.current_files == [outpath]
+
+@mock.patch('mapcreator.building.call_command')
+def test_process_heightfiles_with_gdal_with_no_files(mock_call):
+    state = State()
+    state.set_window(0, 7, 2, 1)
+    status = HeightMapStatus(0, [], state)
+    building.process_heightfiles_with_gdal(status)
+    mock_call.assert_not_called()
+    assert status.current_files == []
+
+@mock.patch('mapcreator.building.call_command')
 def test_translate_heightfile(mock_call):
     def add_mock_files(a, b, c):
         open(building.get_output_path('test.txt', 'hdr'), 'w').close()
