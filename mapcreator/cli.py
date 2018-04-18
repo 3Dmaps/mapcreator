@@ -95,6 +95,42 @@ def set_window(ulx, uly, lrx, lry):
         success('Window set to {} -> {}'.format((ulx, uly), (lrx, lry)))
 
 @click.command()
+@click.argument('epsg_code', type=int)
+def set_height_system(epsg_code):
+    """
+    Specifies a forced coordinate system for source height data as an EPSG code.
+    The EPSG-code must be inserted as an integer.
+
+    Usage example:
+    mapcreator set_height_system 4269
+    """
+    state = load_or_error()
+    if not state: return
+    system_epsgprefix = 'EPSG:{}'.format(epsg_code)
+    info('Setting forced source height file coordinate system to {}'.format(system_epsgprefix))
+    state.set_height_system(system_epsgprefix)
+    if save_or_error(state):
+        success('Forced source height file coordinate system set to {}'.format(system_epsgprefix))
+
+@click.command()
+@click.argument('epsg_code', type=int)
+def set_satellite_system(epsg_code):
+    """
+    Specifies a forced coordinate system for source satellite or aerial image data as an EPSG code.
+    The EPSG-code must be inserted as an integer.
+
+    Usage example:
+    mapcreator set_satellite_system 26912
+    """
+    state = load_or_error()
+    if not state: return
+    system_epsgprefix = 'EPSG:{}'.format(epsg_code)
+    info('Setting forced source satellite/aerial file coordinate system to {}'.format(system_epsgprefix))
+    state.set_satellite_system(system_epsgprefix)
+    if save_or_error(state):
+        success('Forced source satellite/aerial file coordinate system set to {}'.format(system_epsgprefix))
+
+@click.command()
 @click.option('--output', '-o', default='3dmapdata.zip', help='Output file name. Default: 3dmapdata.zip')
 @click.option('--force', '-f', is_flag=True, help='Build even if output file already exists')
 @click.option('--debug', '-d', is_flag=True, help='Causes debug information to be printed during the build')
@@ -204,6 +240,8 @@ cli.add_command(add_height_files)
 cli.add_command(add_satellite_files)
 cli.add_command(add_osm_files)
 cli.add_command(set_window)
+cli.add_command(set_height_system)
+cli.add_command(set_satellite_system)
 cli.add_command(status)
 cli.add_command(reset)
 cli.add_command(build)

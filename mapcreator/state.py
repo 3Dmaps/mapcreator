@@ -82,7 +82,20 @@ class State:
         else:
             return None
 
+    def set_height_system(self, height_coordinatesystem):
+        self.height_coordinatesystem = height_coordinatesystem
+    
+    def has_height_system(self):
+        return hasattr(self, 'height_coordinatesystem') and len(self.height_coordinatesystem) > 0
+    
+    def set_satellite_system(self, satellite_coordinatesystem):
+        self.satellite_coordinatesystem = satellite_coordinatesystem
+    
+    def has_satellite_system(self):
+        return hasattr(self, 'satellite_coordinatesystem') and len(self.satellite_coordinatesystem) > 0
+
     @classmethod
+
     def from_dict(cls, d):
         new_state = State()
         new_state.__dict__ = d
@@ -111,14 +124,19 @@ class State:
         else:
             lines.append('-No open street map files added.')
         if self.has_satellite_files():
-            lines.append('-Satellite files:')
+            lines.append('-Satellite/aerial files:')
             lines.extend(State.file_list_to_lines(self.satellite_files))
         else:
-            lines.append('-No satellite files added.')
+            lines.append('-No satellite/aerial files added.')
         if self.has_window():
             lines.append('-Window:')
             lines.append('--Upper left corner:  x={0[0]}, y={0[1]}'.format(self.get_window_upper_left()))
             lines.append('--Lower right corner: x={0[0]}, y={0[1]}'.format(self.get_window_lower_right()))
         else:
             lines.append('-No projection window set.')
+        if self.has_height_system():
+            lines.append('-Forced source height file coordinate system: {}'.format(self.height_coordinatesystem))
+        if self.has_satellite_system():
+            lines.append('-Forced source satellite/aerial file coordinate system: {}'.format(self.height_coordinatesystem))
+            
         return '\n'.join(lines)

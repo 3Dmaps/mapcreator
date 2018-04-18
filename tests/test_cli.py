@@ -106,6 +106,28 @@ def test_set_window(mock_save, mock_state):
     assert result.exit_code == 0
     assert 'SUCCESS: Window set to' in result.output
 
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'set_height_system')
+@patch('mapcreator.persistence.save_state')
+def test_set_height_system(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['set_height_system', '1234'])
+    mock_state.assert_called_once_with('EPSG:1234')
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: Forced source height file coordinate system set to' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'set_satellite_system')
+@patch('mapcreator.persistence.save_state')
+def test_set_height_system(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['set_satellite_system', '12345'])
+    mock_state.assert_called_once_with('EPSG:12345')
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: Forced source satellite/aerial file coordinate system set to' in result.output
+
 @patch('os.path.exists', lambda s: True)
 @patch('mapcreator.building.init_build', side_effect = RuntimeError('Shouldn\'t have run this!'))
 def test_build_does_nothing_if_target_exists_and_not_force(mock_init):
