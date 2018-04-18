@@ -32,6 +32,13 @@ class OSMData:
     @classmethod
     def get_elem_id(cls, elem):
         return int(elem.get(OSMData.ATTRIB_ID))
+    
+    @classmethod
+    def get_tag(cls, elem, key):
+        for tagElement in elem.findall(OSMData.TAG_TAG):
+            if tagElement.get(OSMData.ATTRIB_KEY) == key:
+                return tagElement.get(OSMData.ATTRIB_VALUE)
+        return None
 
     def preprocess(self):
         self.nodes = {}
@@ -147,25 +154,13 @@ def areaFilter(elem, osmdata):
     """
     Currently filters in only areas with "landuse" in the accepted landuses list.
     """
-    for tagElement in elem.findall(OSMData.TAG_TAG):
-        # Check landuses
-        if tagElement.get(OSMData.ATTRIB_KEY) == OSMData.KEY_LANDUSE and tagElement.get(OSMData.ATTRIB_VALUE) in OSMData.ACCEPTED_LANDUSES:
-            return True
-    return False
+    return OSMData.get_tag(elem, OSMData.KEY_LANDUSE) in OSMData.ACCEPTED_LANDUSES
 
 def trailFilter(elem, osmdata):
     """
     Currently filters in all trails with "highway" in the accepted highways list.
     """
-    for tagElement in elem.findall(OSMData.TAG_TAG):
-        # Check highways
-        if tagElement.get(OSMData.ATTRIB_KEY) == OSMData.KEY_HIGHWAY: 
-            if tagElement.get(OSMData.ATTRIB_VALUE) in OSMData.ACCEPTED_HIGHWAYS:
-                return True
-            else:
-                # Only a single highway tag per trail expected. Highway found but is not of an acceptable type.
-                return False
-    return False
+    return OSMData.get_tag(elem, OSMData.KEY_HIGHWAY) in OSMData.ACCEPTED_HIGHWAYS
 
 class WayCoordinateFilter:
     def __init__(self, minx, maxx, miny, maxy):
