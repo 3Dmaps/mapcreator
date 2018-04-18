@@ -28,7 +28,7 @@ OSM_FILE_EXTENSION = 'xml'
 SATELLITE_FILE_EXTENSION = 'tif'
 SATELLITE_OUTPUT_FILE_EXTENSION = 'png'
 
-INTERMEDIATE_HEIGHT_FILENAME_FORMAT = 'heightfile{}.' + INTERNAL_FILE_EXTENSION
+INTERMEDIATE_HEIGHT_FILENAME = 'heightfile_intermediate.' + INTERNAL_FILE_EXTENSION
 INTERMEDIATE_SATELLITE_FORMAT = 'heightfile{}_satellite.' + SATELLITE_FILE_EXTENSION
 FINAL_HEIGHT_FILENAME_FORMAT = 'heightfile{}.' + HEIGHT_OUTPUT_FILE_EXTENSION
 FINAL_HEIGHT_METADATA_FORMAT = 'heightfile{}.' + HEIGHT_METADATA_FILE_EXTENSION
@@ -114,79 +114,34 @@ def get_output_path(input_path, new_extension = ''):
     new_filename += ('.' + new_extension if new_extension else '')
     return path.join(BUILD_DIR, new_filename)
 
-def prepare(buildstatus, debug = False):
-    """
-    First convert the files to GTiff (GDALs standard format) to make sure that everything works as expected
-    """ 
-    for cf in buildstatus.current_files:
-        outpath = get_output_path(cf, INTERNAL_FILE_EXTENSION)
-        command = 'gdal_translate -of {} {} {}'.format(INTERNAL_FORMAT, cf, outpath)
-        call_command(command, buildstatus, debug)
-        buildstatus.add_next_file(outpath)
-    buildstatus.next()
-
-def cut_projection_window(buildstatus, debug = False):
-    if buildstatus.state.has_window():
-        for cf in buildstatus.current_files:
-            outpath = get_output_path(cf)
+def check_projection_window(heightMapStatus, debug = False):
+    if heightMapStatus.state.has_window():
+        for cf in heightMapStatus.current_files:
             gdal_info = gdal_util.Gdalinfo.for_file(cf)
-            cut_projection_window = buildstatus.state.get_window_string_lowerleft_topright_cut(gdal_info)
+            cut_projection_window = heightMapStatus.state.get_window_string_lowerleft_topright_cut(gdal_info)
             if cut_projection_window:
-                command = 'gdalwarp -te {} {} {}'.format(cut_projection_window, cf, outpath)
-                call_command(command, buildstatus, debug)
-                buildstatus.add_next_file(outpath)
-        buildstatus.next()
-        
+                heightMapStatus.add_next_file(cf)
+    heightMapStatus.next()
 
-def reproject(buildstatus, debug = False):
-    for cf in buildstatus.current_files:
-        outpath = get_output_path(cf)
-        command = 'gdalwarp -tr {} {} -t_srs {} -r bilinear {} {}'.format(OUTPUT_CELLSIZE, OUTPUT_CELLSIZE, PROJECTION_IDENTIFIER, cf, outpath)
-        call_command(command, buildstatus, debug)
-        buildstatus.add_next_file(outpath)
-    buildstatus.next()
-
-def merge(buildstatus, debug = False):
-    """
-    Merge source map files into a single file.
-    """ 
-    if buildstatus.current_files:
-        combined_file_name = INTERMEDIATE_HEIGHT_FILENAME_FORMAT.format('_combined')
-        single_path = path.join(BUILD_DIR, combined_file_name)
-        sourcefiles_as_string = ' '.join(buildstatus.current_files)
-        command = 'gdalwarp {} {}'.format(sourcefiles_as_string, single_path)
-        call_command(command, buildstatus, debug)
-        buildstatus.add_next_file(single_path)
-    buildstatus.next()
-
-def translate(buildstatus, debug = False):
-    for cf in buildstatus.current_files:
-        outpath = get_output_path(cf, HEIGHT_OUTPUT_FILE_EXTENSION)
-        metapath = get_output_path(cf, HEIGHT_METADATA_FILE_EXTENSION)
-
+# Outputs only one combined file
+def process_heightfiles_with_gdal(heightMapStatus, debug = False):
+    if heightMapStatus.current_files:    
+        outpath = path.join(BUILD_DIR, INTERMEDIATE_HEIGHT_FILENAME)
+        heightfiles = ' '.join(heightMapStatus.current_files)
+        projection_window = heightMapStatus.state.get_window_string_lowerleft_topright()
+        command = 'gdalwarp -tr {} {} -te_srs {} -t_srs {} -r bilinear -te {} {} {}'.format(OUTPUT_CELLSIZE, OUTPUT_CELLSIZE, LATLON_DATUM_IDENTIFIER, PROJECTION_IDENTIFIER, projection_window, heightfiles, outpath)
+        call_command(command, heightMapStatus, debug)
+        heightMapStatus.add_next_file(outpath)
+        heightMapStatus.next()
+    
+def translate_heightfiles(heightMapStatus, debug = False):
+    for ind, cf in enumerate(heightMapStatus.current_files):
+        outpath = path.join(FINALIZED_DIR, FINAL_HEIGHT_FILENAME_FORMAT.format(ind))
+        metapath = path.join(FINALIZED_DIR, FINAL_HEIGHT_METADATA_FORMAT.format(ind))
         command = 'gdal_translate -of {} {} {}'.format(HEIGHT_OUTPUT_FORMAT, cf, outpath)
-        call_command(command, buildstatus, debug)
-
-        finalized_metaname = FINAL_HEIGHT_METADATA_FORMAT.format(buildstatus.get_metaindex())
-        finalized_metapath = path.join(FINALIZED_DIR, finalized_metaname)
-        rename(metapath, finalized_metapath)
-
-        buildstatus.add_next_file(outpath)
-        buildstatus.add_result_file(finalized_metapath)
-    buildstatus.next()
-
-def finalize(buildstatus, debug = False):
-    if buildstatus.original_files == []:
-        return
-    if buildstatus.current_files == buildstatus.original_files:
-        raise RuntimeError('Errors detected in heightmap file processing --> Not finalizing anything')
-    for cf in buildstatus.current_files:
-        final_filename = FINAL_HEIGHT_FILENAME_FORMAT.format(buildstatus.get_index())
-        final_path = path.join(FINALIZED_DIR, final_filename)
-        rename(cf, final_path)
-        buildstatus.add_next_file(final_path)
-        buildstatus.add_result_file(final_path)
-    buildstatus.next()
+        call_command(command, heightMapStatus, debug)
+        heightMapStatus.add_result_file(outpath)
+        heightMapStatus.add_result_file(metapath)
 
 # Open Street Map (OSM) XML-file status and actions
 class OSMStatus:
@@ -215,7 +170,6 @@ class OSMStatus:
         else:
             return 'No OSM files were processed.'
         
-
 def load_osm(osmstatus, debug = False):
     for infile in osmstatus.paths:
         osmstatus.add_osm_data(OSMData.load(infile))
@@ -301,7 +255,7 @@ def translate_satellite_to_png(satellitestatus, debug = False):
 
 
 HEIGHTMAP_ACTIONS = (
-    prepare, cut_projection_window, reproject, merge, translate, finalize
+    check_projection_window, process_heightfiles_with_gdal, translate_heightfiles
 )
 
 OSM_ACTIONS = (

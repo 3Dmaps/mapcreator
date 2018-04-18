@@ -1,4 +1,5 @@
 import click
+import sys, traceback
 from mapcreator import building
 from mapcreator import persistence
 from mapcreator import echoes
@@ -102,6 +103,9 @@ def do_build(files, statusclass, actions, state, debug = False):
                 action(buildstatus, debug)
             except Exception as e:
                 errors.append(e)
+                if debug:
+                    e_type, e_value, e_traceback = sys.exc_info()
+                    errors.extend(traceback.format_tb(e_traceback))
                 has_errors = True
     if errors:
         echoes.error('Exceptions caught:')
