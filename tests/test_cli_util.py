@@ -155,5 +155,40 @@ class TestCliUtil:
         cli_util.add_files(files, 'add_osm_file')
         assert mock_state.call_count == len(files)
         assert mock_save.call_count == 1
-        mock_echoes.warn.assert_called_with('3 files (out of 25) added to the project successfully')   
+        mock_echoes.warn.assert_called_with('3 files (out of 25) added to the project successfully')
+    
+    def test_parse_color_wrong_number_of_args(self, mock_echoes):
+        mock_error = mock_echoes.error
+        assert not cli_util.parse_color("tag 123 221 9 77")
+        mock_error.assert_called()
+    
+    def test_parse_color_invalid_number_format(self, mock_echoes):
+        mock_error = mock_echoes.error
+        assert not cli_util.parse_color("terrain 7 8 cheese")
+        mock_error.assert_called()
+    
+    def test_parse_color(self, mock_echoes):
+        mock_error = mock_echoes.error
+        assert ["hello", 7, 88, 3] == cli_util.parse_color("hello 7 88 3")
+        mock_error.assert_not_called()
+    
+    def test_validate_color_inivalid_color(self, mock_echoes):
+        mock_error = mock_echoes.error
+        assert not cli_util.validate_color(-11, 255, 13)
+        mock_error.assert_called()
+        mock_error.reset_mock()
+        assert not cli_util.validate_color(0, 256, 13)
+        mock_error.assert_called()
+        mock_error.reset_mock()
+        assert not cli_util.validate_color(6, 7, 999)
+        mock_error.assert_called()
+    
+    def test_validate_color_valid_color(self, mock_echoes):
+        mock_error = mock_echoes.error
+        assert cli_util.validate_color(0, 255, 127)
+        assert cli_util.validate_color(255, 44, 0)
+        assert cli_util.validate_color(31, 0, 255)
+        assert cli_util.validate_color(123, 221, 99)
+        mock_error.assert_not_called()
+        
     

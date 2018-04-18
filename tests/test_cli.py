@@ -95,6 +95,70 @@ def test_add_satellite_files(mock_add):
     assert result.exit_code == 0
 
 @patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'add_area_color')
+@patch('mapcreator.persistence.save_state')
+def test_add_area_color(mock_save, mock_state):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['add_area_color', 'mytag', '77', '88', '99'])
+    mock_state.assert_called_once_with('mytag', 77, 88, 99)
+    mock_save.assert_called()
+    assert result.exit_code == 0
+    assert 'SUCCESS' in result.output
+    assert 'mytag' in result.output
+    assert str((77, 88, 99)) in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'add_area_color')
+@patch('mapcreator.persistence.save_state')
+def test_add_area_color_invalid_color(mock_save, mock_state):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['add_area_color', 'mytag', '77', '256', '99'])
+    mock_state.assert_not_called()
+    mock_save.assert_not_called()
+    assert result.exit_code == 0
+    assert 'SUCCESS' not in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'add_area_color')
+@patch('mapcreator.persistence.save_state')
+def test_add_area_colors_no_colors(mock_save, mock_state):
+    runner = CliRunner()
+    result = runner.invoke(cli, ['add_area_colors'], input='\n')
+    mock_state.assert_not_called()
+    mock_save.assert_not_called()
+    assert result.exit_code == 0
+    assert 'SUCCESS' not in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'add_area_color')
+@patch('mapcreator.persistence.save_state')
+def test_add_area_colors_one_valid_color(mock_save, mock_state):
+    runner = CliRunner()
+    instring = 'how to hack runescape\noh crap this isnt google\ntest 1 2 3\ntag 999 999 999\n\n'
+    result = runner.invoke(cli, ['add_area_colors'], input=instring)
+    mock_state.assert_called_once_with('test', 1, 2, 3)
+    mock_save.assert_called()
+    assert result.exit_code == 0
+    assert 'SUCCESS' not in result.output
+    assert '1 colors were added' in result.output
+    assert 'out of total 4 lines given' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'add_area_color')
+@patch('mapcreator.persistence.save_state')
+def test_add_area_colors_many_colors(mock_save, mock_state):
+    runner = CliRunner()
+    instring = 'river 0 0 255\nforest 0 255 0\nvolcano 255 0 0\n\n'
+    result = runner.invoke(cli, ['add_area_colors'], input=instring)
+    mock_state.assert_any_call('river', 0, 0, 255)
+    mock_state.assert_any_call('forest', 0, 255, 0)
+    mock_state.assert_any_call('volcano', 255, 0, 0)
+    mock_save.assert_called()
+    assert result.exit_code == 0
+    assert 'SUCCESS' in result.output
+    assert '3 colors' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
 @patch.object(mapcreator.state.State, 'set_window')
 @patch('mapcreator.persistence.save_state')
 def test_set_window(mock_save, mock_state): 
