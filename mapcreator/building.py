@@ -3,6 +3,7 @@ import subprocess
 import shutil
 from os import path, listdir, makedirs, rename, remove, devnull
 from io import StringIO
+from xml.etree import ElementTree as ET
 from zipfile import ZipFile, ZIP_DEFLATED
 from mapcreator import persistence, osm, gdal_util
 from mapcreator.osm import OSMData
@@ -34,6 +35,9 @@ FINAL_HEIGHT_FILENAME_FORMAT = 'heightfile{}.' + HEIGHT_OUTPUT_FILE_EXTENSION
 FINAL_HEIGHT_METADATA_FORMAT = 'heightfile{}.' + HEIGHT_METADATA_FILE_EXTENSION
 FINAL_OSM_FORMAT = 'heightfile{}_trails.' + OSM_FILE_EXTENSION
 FINAL_SATELLITE_FORMAT = 'heightfile{}_satellite.' + SATELLITE_OUTPUT_FILE_EXTENSION
+
+OSM_RGB_KEY = "3dmapsrgb"
+OSM_RGB_VALUE_FORMAT = "{0[0]} {0[1]} {0[2]}"
 
 # General functions, not tied to a file type
 def call_command(command, buildstatus, debug = False):
@@ -235,6 +239,16 @@ def add_filters(osmstatus, debug = False):
 def apply_filters(osmstatus, debug = False):
     map(lambda data: data.do_filter(), osmstatus.osmdata)
 
+def insert_colors(osmstatus, debug = False):
+    for data in osmstatus.osmdata:
+        for way in data.ways.values():
+            tag = OSMData.get_tag(way, OSMData.KEY_LANDUSE)
+            if tag in osmstatus.state.area_colors:
+                ET.SubElement(way, OSMData.TAG_TAG, attrib={
+                    OSMData.ATTRIB_KEY: OSM_RGB_KEY,
+                    OSMData.ATTRIB_VALUE: OSM_RGB_VALUE_FORMAT.format(osmstatus.state.area_colors[tag])
+                })
+
 def prepare_write(osmstatus, debug = False):
     map(lambda data: data.prepare_for_save(), osmstatus.osmdata)
 
@@ -305,7 +319,7 @@ HEIGHTMAP_ACTIONS = (
 )
 
 OSM_ACTIONS = (
-    load_osm, add_filters, apply_filters, prepare_write, write
+    load_osm, add_filters, apply_filters, insert_colors, prepare_write, write
 )
 
 SATELLITE_ACTIONS = (

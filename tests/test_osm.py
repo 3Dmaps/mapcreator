@@ -1,6 +1,7 @@
 import os
 import shutil
 from mapcreator.osm import OSMData, areaFilter, WayCoordinateFilter, trailFilter
+from mapcreator.building import OSMStatus
 from os import path, mkdir
 from util import get_resource_path, assert_xml_equal
 

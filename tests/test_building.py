@@ -3,9 +3,11 @@ import shutil
 import subprocess
 from os import path
 from mapcreator import building
-from mapcreator.building import HeightMapStatus, SatelliteStatus
+from mapcreator.building import HeightMapStatus, OSMStatus, SatelliteStatus
 from mapcreator.state import State
 from mapcreator.gdal_util import Gdalinfo
+from mapcreator.osm import OSMData
+from util import get_resource_path, assert_xml_equal
 from test_persistence import DummyState
 
 def setup_module(module):
@@ -144,6 +146,17 @@ def test_finalize(mock_rename):
     assert path.join(building.FINALIZED_DIR, 'heightfile99.bin') in status.result_files
     assert path.join(building.FINALIZED_DIR, 'heightfile100.bin') in status.result_files
 
+def test_insert_colors():
+    data = OSMData.load(get_resource_path('test_osm_terrains_input.xml'))
+    state = State()
+    state.add_area_color('meadow', 0, 255, 0)
+    status = OSMStatus(0, ['asd'], state)
+    status.osmdata = [data]
+    building.insert_colors(status)
+    outpath = path.join(building.BUILD_DIR, 'result.xml')
+    data.save(outpath)
+    assert_xml_equal(get_resource_path('test_osm_terrain_colors_expected.xml'), outpath)
+
 @mock.patch('mapcreator.building.call_command')
 @mock.patch('mapcreator.gdal_util.Gdalinfo.for_file')
 def test_process_satellite_with_gdal(mock_forfile, mock_call):
@@ -208,4 +221,5 @@ def test_finalize_when_no_changes():
 
 def teardown_function(function):
     if path.exists(building.BUILD_DIR):
-        shutil.rmtree(building.BUILD_DIR)
+        pass
+    #    shutil.rmtree(building.BUILD_DIR)
