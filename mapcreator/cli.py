@@ -108,7 +108,7 @@ def add_area_colors(debug):
     The command reads lines until a blank line or an EOF is encountered.
     You can either input the lines straight into the terminal, or use piping:
 
-    echo colors > mapcreator add_area_colors
+    cat colors > mapcreator add_area_colors
     """
     state = load_or_error()
     if not state: return
