@@ -184,13 +184,57 @@ def test_set_height_system(mock_save, mock_state):
 @patch('mapcreator.persistence.load_state', lambda: State())
 @patch.object(mapcreator.state.State, 'set_satellite_system')
 @patch('mapcreator.persistence.save_state')
-def test_set_height_system(mock_save, mock_state): 
+def test_set_satellite_system(mock_save, mock_state): 
     runner = CliRunner()
     result = runner.invoke(cli, ['set_satellite_system', '12345'])
     mock_state.assert_called_once_with('EPSG:12345')
     assert mock_save.call_count == 1
     assert result.exit_code == 0
     assert 'SUCCESS: Forced source satellite/aerial file coordinate system set to' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'set_height_resolution')
+@patch('mapcreator.persistence.save_state')
+def test_set_height_resolution(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['set_height_resolution', '20'])
+    mock_state.assert_called_once_with(20)
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: Height output resolution set to' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'set_height_resolution')
+@patch('mapcreator.persistence.save_state')
+def test_set_invalid_height_resolution(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['set_height_resolution', '1100'])
+    mock_state.assert_not_called()
+    assert mock_save.call_count == 0
+    assert result.exit_code == 0
+    assert 'ERROR: Invalid resolution' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'set_satellite_resolution')
+@patch('mapcreator.persistence.save_state')
+def test_set_satellite_resolution(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['set_satellite_resolution', '500.5'])
+    mock_state.assert_called_once_with(500.5)
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: Satellite/aerial image output resolution set to' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'set_satellite_resolution')
+@patch('mapcreator.persistence.save_state')
+def test_set_invalid_satellite_resolution(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['set_satellite_resolution', '0.05'])
+    mock_state.assert_not_called()
+    assert mock_save.call_count == 0
+    assert result.exit_code == 0
+    assert 'ERROR: Invalid resolution' in result.output
 
 @patch('os.path.exists', lambda s: True)
 @patch('mapcreator.building.init_build', side_effect = RuntimeError('Shouldn\'t have run this!'))

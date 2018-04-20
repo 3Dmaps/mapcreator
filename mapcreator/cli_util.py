@@ -117,6 +117,13 @@ def validate_color(r, g, b):
             return False
     return True
 
+def validate_resolution(reso, lower, upper):
+    if reso < lower or reso > upper:
+        echoes.error("Invalid resolution {}!".format(reso))
+        echoes.info("(Should be between {} and {})".format(lower, upper))
+        return False
+    return True
+
 def do_build(files, statusclass, actions, state, debug = False):
     has_errors = False
     outfiles = []

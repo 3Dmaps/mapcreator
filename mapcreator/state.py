@@ -13,6 +13,8 @@ class State:
         self.osm_files = []
         self.satellite_files = []
         self.area_colors = {}
+        self.height_resolution = 10
+        self.satellite_resolution = 10
     
     def has_height_files(self):
         return hasattr(self, 'height_files') and len(self.height_files) > 0
@@ -104,8 +106,13 @@ class State:
     def has_satellite_system(self):
         return hasattr(self, 'satellite_coordinatesystem') and len(self.satellite_coordinatesystem) > 0
 
-    @classmethod
+    def set_height_resolution(self, height_resolution):
+        self.height_resolution = height_resolution
 
+    def set_satellite_resolution(self, satellite_resolution):
+        self.satellite_resolution = satellite_resolution
+
+    @classmethod
     def from_dict(cls, d):
         new_state = State()
         new_state.__dict__ = d
@@ -127,23 +134,25 @@ class State:
             lines.append('-Height files:')
             lines.extend(State.file_list_to_lines(self.height_files))
         else:
-            lines.append('-No height files added.')
+            lines.append('-No height files added')
         if self.has_osm_files():
             lines.append('-Open street map files:')
             lines.extend(State.file_list_to_lines(self.osm_files))
         else:
-            lines.append('-No open street map files added.')
+            lines.append('-No open street map files added')
         if self.has_satellite_files():
             lines.append('-Satellite/aerial files:')
             lines.extend(State.file_list_to_lines(self.satellite_files))
         else:
-            lines.append('-No satellite/aerial files added.')
+            lines.append('-No satellite/aerial files added')
         if self.has_window():
             lines.append('-Window:')
             lines.append('--Upper left corner:  x={0[0]}, y={0[1]}'.format(self.get_window_upper_left()))
             lines.append('--Lower right corner: x={0[0]}, y={0[1]}'.format(self.get_window_lower_right()))
         else:
-            lines.append('-No projection window set.')
+            lines.append('-No projection window set')
+        lines.append('-Height file output resolution: {} m'.format(self.height_resolution))
+        lines.append('-Satellite/aerial image output resolution: {} m'.format(self.satellite_resolution))
         if self.has_height_system():
             lines.append('-Forced source height file coordinate system: {}'.format(self.height_coordinatesystem))
         if self.has_satellite_system():
