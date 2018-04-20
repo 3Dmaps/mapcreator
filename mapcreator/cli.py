@@ -225,6 +225,42 @@ def set_satellite_system(epsg_code):
         success('Forced source satellite/aerial file coordinate system set to {}'.format(system_epsgprefix))
 
 @click.command()
+@click.argument('resolution', type=float)
+def set_height_resolution(resolution):
+    """
+    Specifies the height data output resolution in meters as a float value. Default value is 10.0 m.
+    Values in the range 1-1000 are valid.
+    
+    Usage example:
+    mapcreator set_height_resolution 2
+    """
+    state = load_or_error()
+    if not state: return
+    if not validate_resolution(resolution, 1, 1000): return
+    info('Setting height output resolution to {} m'.format(resolution))
+    state.set_height_resolution(resolution)
+    if save_or_error(state):
+        success('Height output resolution set to {} m'.format(resolution))
+
+@click.command()
+@click.argument('resolution', type=float)
+def set_satellite_resolution(resolution):
+    """
+    Specifies the satellite/aerial data output resolution in meters as a float value. Default value is 10.0 m.
+    Values in the range 0.1-1000 are valid.
+    
+    Usage example:
+    mapcreator set_satellite_resolution 1
+    """
+    state = load_or_error()
+    if not state: return
+    if not validate_resolution(resolution, 0.1, 1000): return
+    info('Setting satellite output resolution to {} m'.format(resolution))
+    state.set_satellite_resolution(resolution)
+    if save_or_error(state):
+        success('Satellite/aerial image output resolution set to {} m'.format(resolution))
+
+@click.command()
 @click.option('--output', '-o', default='3dmapdata.zip', help='Output file name. Default: 3dmapdata.zip')
 @click.option('--force', '-f', is_flag=True, help='Build even if output file already exists')
 @click.option('--debug', '-d', is_flag=True, help='Causes debug information to be printed during the build')
@@ -340,6 +376,8 @@ cli.add_command(set_height_system)
 cli.add_command(set_satellite_system)
 cli.add_command(status)
 cli.add_command(show_area_colors)
+cli.add_command(set_height_resolution)
+cli.add_command(set_satellite_resolution)
 cli.add_command(reset)
 cli.add_command(build)
 cli.add_command(clean_temp_files)
