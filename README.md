@@ -55,7 +55,9 @@ The project uses Travis as its continous integration platform. Travis automatica
 Versioning. *Not defined yet.*
 
 ## Supported source data formats
-Supported altitude model and satellite/aerial image input file formats are the same as those supported by GDAL (http://www.gdal.org/formats_list.html). Mapcreator uses GDAL for processing the input data. Examples of altitude source data formats are ASCII Grid (.asc) and GeoTIFF (.tif). Examples of satellite and aerial image source data formats are JPEG2000 (.jp2) and GeoTIFF (.tif).
+Supported altitude model and satellite/aerial image source file formats are the same as those supported by GDAL (http://www.gdal.org/formats_list.html). Mapcreator uses GDAL for processing the input data. Examples of altitude source data formats are ASCII Grid (.asc) and GeoTIFF (.tif). Examples of satellite and aerial image source data formats are JPEG2000 (.jp2) and GeoTIFF (.tif). 
+
+Route, point of interest and landuse data must be in Open Street Map XML-format (usually .xml or .osm). OSM source data can be exported from https://www.openstreetmap.org/.
 
 ## Source data licensing
 Repository contains source geographic data from the following sources:
