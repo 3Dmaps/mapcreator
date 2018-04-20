@@ -54,6 +54,9 @@ The project uses Travis as its continous integration platform. Travis automatica
 ## Versioning
 Versioning. *Not defined yet.*
 
+## Supported source data formats
+Supported altitude model and satellite/aerial image input file formats are the same as those supported by GDAL (http://www.gdal.org/formats_list.html). Mapcreator uses GDAL for processing the input data. Examples of altitude source data formats are ASCII Grid (.asc) and GeoTIFF (.tif). Examples of satellite and aerial image source data formats are JPEG2000 (.jp2) and GeoTIFF (.tif).
+
 ## Source data licensing
 Repository contains source geographic data from the following sources:
 - Finnish regions: the [National Land Survey of Finland Topographic Database](https://tiedostopalvelu.maanmittauslaitos.fi/tp/kartta) 1-4/2018 (source data licenced under CC BY 4.0)
