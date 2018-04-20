@@ -19,7 +19,6 @@ INTERNAL_FILE_EXTENSION = 'tiff'
 
 LATLON_DATUM_IDENTIFIER = 'EPSG:4326'
 PROJECTION_IDENTIFIER = 'EPSG:3857'
-OUTPUT_CELLSIZE = 10
 
 HEIGHT_OUTPUT_FORMAT = 'ENVI'
 HEIGHT_OUTPUT_FILE_EXTENSION = 'bin'
@@ -133,7 +132,8 @@ def process_heightfiles_with_gdal(heightMapStatus, debug = False):
         outpath = path.join(BUILD_DIR, INTERMEDIATE_HEIGHT_FILENAME)
         heightfiles = ' '.join(heightMapStatus.current_files)
         projection_window = heightMapStatus.state.get_window_string_lowerleft_topright()
-        command = 'gdalwarp -tr {} {} -te_srs {} -t_srs {} -r bilinear -te {} {} {}'.format(OUTPUT_CELLSIZE, OUTPUT_CELLSIZE, LATLON_DATUM_IDENTIFIER, PROJECTION_IDENTIFIER, projection_window, heightfiles, outpath)
+        cellsize = heightMapStatus.state.height_resolution
+        command = 'gdalwarp -tr {} {} -te_srs {} -t_srs {} -r bilinear -te {} {} {}'.format(cellsize, cellsize, LATLON_DATUM_IDENTIFIER, PROJECTION_IDENTIFIER, projection_window, heightfiles, outpath)
         call_command(command, heightMapStatus, debug)
         heightMapStatus.add_next_file(outpath)
         heightMapStatus.next()
@@ -256,7 +256,8 @@ def process_satellite_with_gdal(satellitestatus, debug = False):
     if satellitestatus.files_in_window:
         satfiles = ' '.join(satellitestatus.files_in_window)
         projection_window = satellitestatus.state.get_window_string_lowerleft_topright()
-        command = 'gdalwarp -tr {} {} -te_srs {} -t_srs {} -r bilinear -te {} {} {}'.format(OUTPUT_CELLSIZE, OUTPUT_CELLSIZE, LATLON_DATUM_IDENTIFIER, PROJECTION_IDENTIFIER, projection_window, satfiles, outpath)
+        cellsize = satellitestatus.state.satellite_resolution
+        command = 'gdalwarp -tr {} {} -te_srs {} -t_srs {} -r bilinear -te {} {} {}'.format(cellsize, cellsize, LATLON_DATUM_IDENTIFIER, PROJECTION_IDENTIFIER, projection_window, satfiles, outpath)
         call_command(command, satellitestatus, debug)
         satellitestatus.add_intermediate_file(outpath)
 

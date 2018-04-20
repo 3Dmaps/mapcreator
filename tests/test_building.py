@@ -118,6 +118,18 @@ def test_process_heightfiles_with_gdal(mock_call):
     assert status.current_files == [outpath]
 
 @mock.patch('mapcreator.building.call_command')
+def test_process_heightfiles_with_gdal_reso30(mock_call):
+    state = State()
+    state.set_window(0, 7, 2, 1)
+    state.set_height_resolution(30)
+    status = HeightMapStatus(0, ['test.txt'], state)
+    building.process_heightfiles_with_gdal(status)
+    outpath = path.join(building.BUILD_DIR, building.INTERMEDIATE_HEIGHT_FILENAME)
+    expected_command = 'gdalwarp -tr 30 30 -te_srs EPSG:4326 -t_srs EPSG:3857 -r bilinear -te 0 1 2 7 test.txt {}'.format(outpath)
+    mock_call.assert_called_once_with(expected_command, status, False)
+    assert status.current_files == [outpath]
+
+@mock.patch('mapcreator.building.call_command')
 def test_process_heightfiles_with_gdal_with_no_files(mock_call):
     state = State()
     state.set_window(0, 7, 2, 1)
