@@ -131,11 +131,15 @@ def get_output_path(input_path, new_extension = ''):
 def process_heightfiles_with_gdal(heightMapStatus, debug = False):
     if heightMapStatus.current_files:    
         outpath = path.join(BUILD_DIR, INTERMEDIATE_HEIGHT_FILENAME)
-        heightfiles = ' '.join(heightMapStatus.current_files)
-        projection_window = heightMapStatus.state.get_window_string_lowerleft_topright()
-        command = 'gdalwarp -tr {} {} -te_srs {} -t_srs {} -r bilinear -te {} {} {}'.format(OUTPUT_CELLSIZE, OUTPUT_CELLSIZE, LATLON_DATUM_IDENTIFIER, PROJECTION_IDENTIFIER, projection_window, heightfiles, outpath)
-        if heightMapStatus.state.has_height_system():
-            command = '{} -s_srs {} {}'.format(command[:8], heightMapStatus.state.height_coordinatesystem, command[9:])
+        command = 'gdalwarp {source_system_cmd}-tr {OUTPUT_CELLSIZE} {OUTPUT_CELLSIZE} -te_srs {LATLON_DATUM_IDENTIFIER} -t_srs {PROJECTION_IDENTIFIER} -r bilinear -te {projection_window} {heightfiles} {outpath}'.format(
+            source_system_cmd = '-s_srs {} '.format(heightMapStatus.state.height_coordinatesystem) if heightMapStatus.state.has_height_system() else '', 
+            OUTPUT_CELLSIZE = OUTPUT_CELLSIZE, 
+            LATLON_DATUM_IDENTIFIER = LATLON_DATUM_IDENTIFIER, 
+            PROJECTION_IDENTIFIER = PROJECTION_IDENTIFIER, 
+            projection_window = heightMapStatus.state.get_window_string_lowerleft_topright(), 
+            heightfiles = ' '.join(heightMapStatus.current_files), 
+            outpath = outpath
+        )
         call_command(command, heightMapStatus, debug)
         heightMapStatus.add_next_file(outpath)
         heightMapStatus.next()
@@ -255,11 +259,15 @@ class SatelliteStatus:
 def process_satellite_with_gdal(satellitestatus, debug = False):
     if satellitestatus.current_files:
         outpath = path.join(FINALIZED_DIR, INTERMEDIATE_SATELLITE_FORMAT.format(0))
-        satfiles = ' '.join(satellitestatus.current_files)
-        projection_window = satellitestatus.state.get_window_string_lowerleft_topright()
-        command = 'gdalwarp -tr {} {} -te_srs {} -t_srs {} -r bilinear -te {} {} {}'.format(OUTPUT_CELLSIZE, OUTPUT_CELLSIZE, LATLON_DATUM_IDENTIFIER, PROJECTION_IDENTIFIER, projection_window, satfiles, outpath)
-        if satellitestatus.state.has_satellite_system():
-            command = '{} -s_srs {} {}'.format(command[:8], satellitestatus.state.satellite_coordinatesystem, command[9:])
+        command = 'gdalwarp {source_system_cmd}-tr {OUTPUT_CELLSIZE} {OUTPUT_CELLSIZE} -te_srs {LATLON_DATUM_IDENTIFIER} -t_srs {PROJECTION_IDENTIFIER} -r bilinear -te {projection_window} {satfiles} {outpath}'.format(
+            source_system_cmd='-s_srs {} '.format(satellitestatus.state.satellite_coordinatesystem) if satellitestatus.state.has_satellite_system() else '', 
+            OUTPUT_CELLSIZE=OUTPUT_CELLSIZE, 
+            LATLON_DATUM_IDENTIFIER=LATLON_DATUM_IDENTIFIER, 
+            PROJECTION_IDENTIFIER=PROJECTION_IDENTIFIER, 
+            projection_window=satellitestatus.state.get_window_string_lowerleft_topright(), 
+            satfiles=' '.join(satellitestatus.current_files), 
+            outpath=outpath
+        )
         call_command(command, satellitestatus, debug)
         satellitestatus.add_next_file(outpath)
         satellitestatus.next()
