@@ -19,7 +19,6 @@ INTERNAL_FILE_EXTENSION = 'tiff'
 
 LATLON_DATUM_IDENTIFIER = 'EPSG:4326'
 PROJECTION_IDENTIFIER = 'EPSG:3857'
-OUTPUT_CELLSIZE = 10
 
 HEIGHT_OUTPUT_FORMAT = 'ENVI'
 HEIGHT_OUTPUT_FILE_EXTENSION = 'bin'
@@ -131,9 +130,9 @@ def get_output_path(input_path, new_extension = ''):
 def process_heightfiles_with_gdal(heightMapStatus, debug = False):
     if heightMapStatus.current_files:    
         outpath = path.join(BUILD_DIR, INTERMEDIATE_HEIGHT_FILENAME)
-        command = 'gdalwarp {source_system_cmd}-tr {output_cellsize} {output_cellsize} -te_srs {latlon_datum_identifier} -t_srs {projection_identifier} -r bilinear -te {projection_window} {heightfiles} {outpath}'.format(
+        command = 'gdalwarp {source_system_cmd}-tr {cellsize} {cellsize} -te_srs {latlon_datum_identifier} -t_srs {projection_identifier} -r bilinear -te {projection_window} {heightfiles} {outpath}'.format(
             source_system_cmd = '-s_srs {} '.format(heightMapStatus.state.height_coordinatesystem) if heightMapStatus.state.has_height_system() else '', 
-            output_cellsize = OUTPUT_CELLSIZE, 
+            cellsize = heightMapStatus.state.height_resolution, 
             latlon_datum_identifier = LATLON_DATUM_IDENTIFIER, 
             projection_identifier = PROJECTION_IDENTIFIER, 
             projection_window = heightMapStatus.state.get_window_string_lowerleft_topright(), 
@@ -259,9 +258,9 @@ class SatelliteStatus:
 def process_satellite_with_gdal(satellitestatus, debug = False):
     if satellitestatus.current_files:
         outpath = path.join(FINALIZED_DIR, INTERMEDIATE_SATELLITE_FORMAT.format(0))
-        command = 'gdalwarp {source_system_cmd}-tr {output_cellsize} {output_cellsize} -te_srs {latlon_datum_identifier} -t_srs {projection_identifier} -r bilinear -te {projection_window} {satfiles} {outpath}'.format(
+        command = 'gdalwarp {source_system_cmd}-tr {cellsize} {cellsize} -te_srs {latlon_datum_identifier} -t_srs {projection_identifier} -r bilinear -te {projection_window} {satfiles} {outpath}'.format(
             source_system_cmd='-s_srs {} '.format(satellitestatus.state.satellite_coordinatesystem) if satellitestatus.state.has_satellite_system() else '', 
-            output_cellsize=OUTPUT_CELLSIZE, 
+            cellsize = satellitestatus.state.satellite_resolution, 
             latlon_datum_identifier = LATLON_DATUM_IDENTIFIER, 
             projection_identifier = PROJECTION_IDENTIFIER, 
             projection_window=satellitestatus.state.get_window_string_lowerleft_topright(), 

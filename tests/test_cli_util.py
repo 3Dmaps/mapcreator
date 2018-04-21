@@ -190,5 +190,24 @@ class TestCliUtil:
         assert cli_util.validate_color(31, 0, 255)
         assert cli_util.validate_color(123, 221, 99)
         mock_error.assert_not_called()
+    
+    def test_validate_resolution_valid_reso(self, mock_echoes):
+        mock_error = mock_echoes.error
+        assert cli_util.validate_resolution(1, 0.5, 1000)
+        assert cli_util.validate_resolution(0.05, 0.01, 0.05)
+        assert cli_util.validate_resolution(700, 300, 800)
+        mock_error.assert_not_called()
+    
+    def test_validate_resolution_invalid_reso(self, mock_echoes):
+        mock_error = mock_echoes.error
+        assert not cli_util.validate_resolution(1, 2, 1000)
+        mock_error.assert_called()
+        mock_error.reset_mock()
+        assert not cli_util.validate_resolution(1000, 50, 999)
+        mock_error.assert_called()
+        mock_error.reset_mock()
+        assert not cli_util.validate_resolution(0.05, 0.1, 0.5)
+        mock_error.assert_called()
+        
         
     
