@@ -156,7 +156,7 @@ class State:
         if self.has_height_system():
             lines.append('-Forced source height file coordinate system: {}'.format(self.height_coordinatesystem))
         if self.has_satellite_system():
-            lines.append('-Forced source satellite/aerial file coordinate system: {}'.format(self.height_coordinatesystem))        
+            lines.append('-Forced source satellite/aerial file coordinate system: {}'.format(self.satellite_coordinatesystem))        
         if self.has_area_colors():
             if len(self.area_colors) > 5:
                 lines.append('-There are {} area colors set'.format(len(self.area_colors)))

@@ -52,6 +52,15 @@ def init_build():
     makedirs(BUILD_DIR)
     makedirs(FINALIZED_DIR)
 
+def check_projection_window(buildStatus, debug = False):
+    if buildStatus.state.has_window():
+        for cf in buildStatus.current_files:
+            gdal_info = gdal_util.Gdalinfo.for_file(cf)
+            cut_projection_window = buildStatus.state.get_window_string_lowerleft_topright_cut(gdal_info)
+            if cut_projection_window:
+                buildStatus.add_next_file(cf)
+    buildStatus.next()
+
 def package(package_name, files):
     with ZipFile(package_name, 'w', ZIP_DEFLATED) as package:
         for f in files:
@@ -117,23 +126,19 @@ def get_output_path(input_path, new_extension = ''):
     new_filename += ('.' + new_extension if new_extension else '')
     return path.join(BUILD_DIR, new_filename)
 
-def check_projection_window(heightMapStatus, debug = False):
-    if heightMapStatus.state.has_window():
-        for cf in heightMapStatus.current_files:
-            gdal_info = gdal_util.Gdalinfo.for_file(cf)
-            cut_projection_window = heightMapStatus.state.get_window_string_lowerleft_topright_cut(gdal_info)
-            if cut_projection_window:
-                heightMapStatus.add_next_file(cf)
-    heightMapStatus.next()
-
 # Outputs only one combined file
 def process_heightfiles_with_gdal(heightMapStatus, debug = False):
     if heightMapStatus.current_files:    
         outpath = path.join(BUILD_DIR, INTERMEDIATE_HEIGHT_FILENAME)
-        heightfiles = ' '.join(heightMapStatus.current_files)
-        projection_window = heightMapStatus.state.get_window_string_lowerleft_topright()
-        cellsize = heightMapStatus.state.height_resolution
-        command = 'gdalwarp -tr {} {} -te_srs {} -t_srs {} -r bilinear -te {} {} {}'.format(cellsize, cellsize, LATLON_DATUM_IDENTIFIER, PROJECTION_IDENTIFIER, projection_window, heightfiles, outpath)
+        command = 'gdalwarp {source_system_cmd}-tr {cellsize} {cellsize} -te_srs {latlon_datum_identifier} -t_srs {projection_identifier} -r bilinear -te {projection_window} {heightfiles} {outpath}'.format(
+            source_system_cmd = '-s_srs {} '.format(heightMapStatus.state.height_coordinatesystem) if heightMapStatus.state.has_height_system() else '', 
+            cellsize = heightMapStatus.state.height_resolution, 
+            latlon_datum_identifier = LATLON_DATUM_IDENTIFIER, 
+            projection_identifier = PROJECTION_IDENTIFIER, 
+            projection_window = heightMapStatus.state.get_window_string_lowerleft_topright(), 
+            heightfiles = ' '.join(heightMapStatus.current_files), 
+            outpath = outpath
+        )
         call_command(command, heightMapStatus, debug)
         heightMapStatus.add_next_file(outpath)
         heightMapStatus.next()
@@ -217,14 +222,18 @@ class SatelliteStatus:
     def __init__(self, index, satellitefiles, state):
         self.output = StringIO()
         self.original_files = satellitefiles
+        self.current_files = satellitefiles
+        self.next_files = []
+        
         self.files_in_window = []
         self.state = state
         self.intermediate_files = []
         self.result_files = []
-    def add_file_in_window(self, f):
-        self.files_in_window.append(f)
-    def add_intermediate_file(self, f):
-        self.intermediate_files.append(f)
+    def next(self):
+        self.current_files = self.next_files
+        self.next_files = []
+    def add_next_file(self, f):
+        self.next_files.append(f)
     def add_result_file(self, f):
         self.result_files.append(f)
     def get_result_files(self):
@@ -245,29 +254,29 @@ class SatelliteStatus:
                 lines.extend(self.output.getvalue().split('\n'))
         return '\n'.join(lines)
 
+# Outputs only one combined file
 def process_satellite_with_gdal(satellitestatus, debug = False):
-    outpath = path.join(FINALIZED_DIR, INTERMEDIATE_SATELLITE_FORMAT.format(0))
-    
-    # Check which satellite files lie in the window and call GDAL with only them as input files
-    for satfile in satellitestatus.original_files:
-        gdal_info = gdal_util.Gdalinfo.for_file(satfile)
-        if satellitestatus.state.get_window_string_lowerleft_topright_cut(gdal_info):
-            satellitestatus.add_file_in_window(satfile)
-    if satellitestatus.files_in_window:
-        satfiles = ' '.join(satellitestatus.files_in_window)
-        projection_window = satellitestatus.state.get_window_string_lowerleft_topright()
-        cellsize = satellitestatus.state.satellite_resolution
-        command = 'gdalwarp -tr {} {} -te_srs {} -t_srs {} -r bilinear -te {} {} {}'.format(cellsize, cellsize, LATLON_DATUM_IDENTIFIER, PROJECTION_IDENTIFIER, projection_window, satfiles, outpath)
+    if satellitestatus.current_files:
+        outpath = path.join(FINALIZED_DIR, INTERMEDIATE_SATELLITE_FORMAT.format(0))
+        command = 'gdalwarp {source_system_cmd}-tr {cellsize} {cellsize} -te_srs {latlon_datum_identifier} -t_srs {projection_identifier} -r bilinear -te {projection_window} {satfiles} {outpath}'.format(
+            source_system_cmd='-s_srs {} '.format(satellitestatus.state.satellite_coordinatesystem) if satellitestatus.state.has_satellite_system() else '', 
+            cellsize = satellitestatus.state.satellite_resolution, 
+            latlon_datum_identifier = LATLON_DATUM_IDENTIFIER, 
+            projection_identifier = PROJECTION_IDENTIFIER, 
+            projection_window=satellitestatus.state.get_window_string_lowerleft_topright(), 
+            satfiles=' '.join(satellitestatus.current_files), 
+            outpath=outpath
+        )
         call_command(command, satellitestatus, debug)
-        satellitestatus.add_intermediate_file(outpath)
+        satellitestatus.add_next_file(outpath)
+        satellitestatus.next()
 
 def translate_satellite_to_png(satellitestatus, debug = False):
-    if satellitestatus.intermediate_files:
-        outpath = path.join(FINALIZED_DIR, FINAL_SATELLITE_FORMAT.format(0))
-        command = 'gdal_translate -of {} {} {}'.format(SATELLITE_OUTPUT_FORMAT, ' '.join(satellitestatus.intermediate_files), outpath)
-        call_command(command, satellitestatus, debug)
+    for ind, cf in enumerate(satellitestatus.current_files):
+        outpath = path.join(FINALIZED_DIR, FINAL_SATELLITE_FORMAT.format(ind))
+        command = 'gdal_translate -of {} {} {}'.format(SATELLITE_OUTPUT_FORMAT, cf, outpath)
+        call_command(command, satellitestatus, debug)    
         satellitestatus.add_result_file(outpath)    
-
 
 HEIGHTMAP_ACTIONS = (
     check_projection_window, process_heightfiles_with_gdal, translate_heightfiles
@@ -278,5 +287,5 @@ OSM_ACTIONS = (
 )
 
 SATELLITE_ACTIONS = (
-    process_satellite_with_gdal, translate_satellite_to_png
+    check_projection_window, process_satellite_with_gdal, translate_satellite_to_png
 )
