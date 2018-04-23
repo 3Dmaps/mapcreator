@@ -98,6 +98,7 @@ def clear_files(clear_method_name, files_type):
     getattr(state, clear_method_name)() # Call method whose name is clear_method_name
     if save_or_error(state):
         echoes.success('All {} files cleared successfully!'.format(files_type))
+    
 
 def parse_color(line, debug = False):
     PARSER = [str, int, int, int]

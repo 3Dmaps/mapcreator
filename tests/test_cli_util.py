@@ -157,6 +157,15 @@ class TestCliUtil:
         assert mock_save.call_count == 1
         mock_echoes.warn.assert_called_with('3 files (out of 25) added to the project successfully')
     
+    @patch('mapcreator.persistence.load_state', lambda: State())
+    @patch.object(mapcreator.state.State, 'clear_osm_files')
+    @patch('mapcreator.persistence.save_state')
+    def test_clear_files(self, mock_save, mock_state, mock_echoes):
+        cli_util.clear_files('clear_osm_files', 'open street map')
+        assert mock_state.call_count == 1
+        assert mock_save.call_count == 1
+        mock_echoes.success.assert_called_with('All open street map files cleared successfully!')
+      
     def test_parse_color_wrong_number_of_args(self, mock_echoes):
         mock_error = mock_echoes.error
         assert not cli_util.parse_color("tag 123 221 9 77")
