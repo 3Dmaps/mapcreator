@@ -72,7 +72,7 @@ def add_files(files, add_method_name):
     echoes.info('Adding files to project...')
     count = 0
     for fpath in files:
-        result = getattr(state, add_method_name)(fpath) # Call method which name is add_method_name
+        result = getattr(state, add_method_name)(fpath) # Call method whose name is add_method_name
         if result == FileAddResult.DOESNT_EXIST:
             echoes.error('File "{}" doesn\'t exist!'.format(fpath))
         elif result == FileAddResult.ALREADY_ADDED:
@@ -90,6 +90,15 @@ def add_files(files, add_method_name):
             echoes.warn("{} files (out of {}) added to the project successfully".format(count, len(files)))
     else:
         echoes.warn('No files were added.')
+
+def clear_files(clear_method_name, files_type):
+    state = load_or_error()
+    if not state: return
+    echoes.info('Clearing {} files...'.format(files_type))
+    getattr(state, clear_method_name)() # Call method whose name is clear_method_name
+    if save_or_error(state):
+        echoes.success('All {} files cleared successfully!'.format(files_type))
+    
 
 def parse_color(line, debug = False):
     PARSER = [str, int, int, int]

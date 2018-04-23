@@ -236,6 +236,74 @@ def test_set_invalid_satellite_resolution(mock_save, mock_state):
     assert result.exit_code == 0
     assert 'ERROR: Invalid resolution' in result.output
 
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'clear_area_colors')
+@patch('mapcreator.persistence.save_state')
+def test_clear_area_colors(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['clear_area_colors'])
+    mock_state.assert_called()
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: Area colors cleared successfully!' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'clear_height_files')
+@patch('mapcreator.persistence.save_state')
+def test_clear_height_files(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['clear_height_files'])
+    mock_state.assert_called()
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: All height files cleared successfully!' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'clear_osm_files')
+@patch('mapcreator.persistence.save_state')
+def test_clear_osm_files(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['clear_osm_files'])
+    mock_state.assert_called()
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: All open street map files cleared successfully!' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'clear_satellite_files')
+@patch('mapcreator.persistence.save_state')
+def test_clear_satellite_files(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['clear_satellite_files'])
+    mock_state.assert_called()
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: All satellite files cleared successfully!' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'clear_satellite_system')
+@patch('mapcreator.persistence.save_state')
+def test_clear_satellite_system(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['clear_satellite_system'])
+    mock_state.assert_called()
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: Forced source satellite/aerial file coordinate system cleared!' in result.output
+
+@patch('mapcreator.persistence.load_state', lambda: State())
+@patch.object(mapcreator.state.State, 'clear_height_system')
+@patch('mapcreator.persistence.save_state')
+def test_clear_height_system(mock_save, mock_state): 
+    runner = CliRunner()
+    result = runner.invoke(cli, ['clear_height_system'])
+    mock_state.assert_called()
+    assert mock_save.call_count == 1
+    assert result.exit_code == 0
+    assert 'SUCCESS: Forced source height file coordinate system cleared!' in result.output
+
+
 @patch('os.path.exists', lambda s: True)
 @patch('mapcreator.building.init_build', side_effect = RuntimeError('Shouldn\'t have run this!'))
 def test_build_does_nothing_if_target_exists_and_not_force(mock_init):
