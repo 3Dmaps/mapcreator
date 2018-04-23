@@ -28,11 +28,20 @@ class State:
     def add_height_file(self, fpath):
         return State.add_file(fpath, self.height_files)
     
+    def clear_height_files(self):
+        self.height_files = []
+
     def add_osm_file(self, fpath):
         return State.add_file(fpath, self.osm_files)
     
+    def clear_osm_files(self):
+        self.osm_files = []
+
     def add_satellite_file(self, fpath):
         return State.add_file(fpath, self.satellite_files)
+    
+    def clear_satellite_files(self):
+        self.satellite_files = []
 
     @classmethod
     def add_file(cls, fpath, flist):
@@ -100,11 +109,17 @@ class State:
     def has_height_system(self):
         return hasattr(self, 'height_coordinatesystem') and len(self.height_coordinatesystem) > 0
     
+    def clear_height_system(self):
+        self.height_coordinatesystem = {}
+
     def set_satellite_system(self, satellite_coordinatesystem):
         self.satellite_coordinatesystem = satellite_coordinatesystem
     
     def has_satellite_system(self):
         return hasattr(self, 'satellite_coordinatesystem') and len(self.satellite_coordinatesystem) > 0
+    
+    def clear_satellite_system(self):
+        self.satellite_coordinatesystem = {}
 
     def set_height_resolution(self, height_resolution):
         self.height_resolution = height_resolution

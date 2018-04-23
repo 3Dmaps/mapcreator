@@ -54,6 +54,11 @@ def add_height_files(files):
     add_files(files, 'add_height_file')
 
 @click.command()
+def clear_height_files():
+    """Clears height files"""
+    clear_files('clear_height_files', 'height')
+
+@click.command()
 @click.argument('files', nargs=-1)
 def add_osm_files(files):
     """Adds open street map files to the project"""
@@ -64,6 +69,11 @@ def add_osm_files(files):
     add_files(files, 'add_osm_file')
 
 @click.command()
+def clear_osm_files():
+    """Clears open street map files"""
+    clear_files('clear_osm_files', 'open street map')
+
+@click.command()
 @click.argument('files', nargs=-1)
 def add_satellite_files(files):
     """Adds given satellite image files to the project"""
@@ -72,6 +82,11 @@ def add_satellite_files(files):
         info('Try mapcreator add_satellite_files [file 1] [file 2] ... [file n]')
         return
     add_files(files, 'add_satellite_file')
+
+@click.command()
+def clear_satellite_files():
+    """Clears satellite/aerial image files"""
+    clear_files('clear_satellite_files', 'satellite')
 
 @click.command()
 @click.argument('tag')
@@ -164,7 +179,18 @@ def show_area_colors(technical):
         output_func(line_format.format(tag, r, g, b))
     if technical:
         output_func('')
-        
+
+@click.command()
+def clear_area_colors():
+    """
+    Clears area colors.
+    """
+    state = load_or_error()
+    if not state: return
+    echoes.info('Clearing area colors...')
+    state.clear_area_colors()
+    if not save_or_error(state): return
+    echoes.success('Area colors cleared successfully!')
 
 @click.command()
 @click.argument('ulx', type=float)
@@ -207,6 +233,19 @@ def set_height_system(epsg_code):
         success('Forced source height file coordinate system set to {}'.format(system_epsgprefix))
 
 @click.command()
+def clear_height_system():
+    """
+    Clears the set forced coordinate system for source height data. After clearing, mapcreator
+    automatically uses the coordinate system read from the source file metadata.
+    """
+    state = load_or_error()
+    if not state: return
+    info('Clearing forced source height file coordinate system')
+    state.clear_height_system()
+    if save_or_error(state):
+        success('Forced source height file coordinate system cleared!')
+
+@click.command()
 @click.argument('epsg_code', type=int)
 def set_satellite_system(epsg_code):
     """
@@ -223,6 +262,19 @@ def set_satellite_system(epsg_code):
     state.set_satellite_system(system_epsgprefix)
     if save_or_error(state):
         success('Forced source satellite/aerial file coordinate system set to {}'.format(system_epsgprefix))
+
+@click.command()
+def clear_satellite_system():
+    """
+    Clears the set forced coordinate system for source satellite/aerial image data. After clearing, 
+    mapcreator automatically uses the coordinate system read from the source file metadata.
+    """
+    state = load_or_error()
+    if not state: return
+    info('Clearing forced source satellite/aerial file coordinate system')
+    state.clear_satellite_system()
+    if save_or_error(state):
+        success('Forced source satellite/aerial file coordinate system cleared!')
 
 @click.command()
 @click.argument('resolution', type=float)
@@ -381,3 +433,9 @@ cli.add_command(set_satellite_resolution)
 cli.add_command(reset)
 cli.add_command(build)
 cli.add_command(clean_temp_files)
+cli.add_command(clear_area_colors)
+cli.add_command(clear_height_files)
+cli.add_command(clear_osm_files)
+cli.add_command(clear_satellite_files)
+cli.add_command(clear_height_system)
+cli.add_command(clear_satellite_system)
