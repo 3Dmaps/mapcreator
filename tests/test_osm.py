@@ -1,6 +1,6 @@
 import os
 import shutil
-from mapcreator.osm import OSMData, areaFilter, WayCoordinateFilter, trailFilter, OSMMerger
+from mapcreator.osm import OSMData, areaFilter, WayCoordinateFilter, trailFilter, merge
 from mapcreator.building import OSMStatus
 from os import path, mkdir
 from util import get_resource_path, assert_xml_equal
@@ -90,7 +90,7 @@ def test_osm_trailfilter_with_coordinates():
 def test_osm_merger():
     trails = OSMData.load(get_resource_path('test_osm_trails_input.xml'))
     terrains = OSMData.load(get_resource_path('test_osm_terrains_input.xml'))
-    combined = OSMMerger().merge([trails, terrains])
+    combined = merge([trails, terrains])
     result_path = path.join(TEMP_DIR, 'test_osm_combined_result.xml')
     combined.tree.write(result_path, encoding='utf-8', xml_declaration=True)
     assert_xml_equal(get_resource_path('test_osm_combined_result.xml'), result_path)
