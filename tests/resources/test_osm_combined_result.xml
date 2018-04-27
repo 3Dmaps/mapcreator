@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='utf-8'?>
+<osm version="0.6">
+  <node changeset="28027466" id="3279125292" lat="36.2169205" lon="-112.0567855" timestamp="2015-01-09T20:21:34Z" uid="183021" user="tomthepom" version="1" />
+  <node changeset="32037795" id="3601146925" lat="36.173818" lon="-112.0382506" timestamp="2015-06-17T20:21:17Z" uid="2748195" user="karitotp" version="1" />
+  <node changeset="17064500" id="1467739587" lat="36.0996284" lon="-112.0939252" timestamp="2013-07-23T16:57:33Z" uid="183021" user="tomthepom" version="2" />
+  <node changeset="9560257" id="1467739588" lat="36.0998105" lon="-112.0939663" timestamp="2011-10-15T01:08:21Z" uid="509900" user="scorfman" version="1" />
+  <node changeset="2295450" id="476033384" lat="46.0969925" lon="-112.0957118" timestamp="2009-08-28T22:27:45Z" uid="32890" user="jfuredy" version="1" />
+  <node changeset="17065012" id="476033640" lat="46.0983489" lon="-112.0953611" timestamp="2013-07-23T17:39:14Z" uid="183021" user="tomthepom" version="3" />
+  <way changeset="12703330" id="133335855" timestamp="2012-08-12T15:58:04Z" uid="24920" user="Schusch" version="2">
+    <nd ref="1467739587" />
+    <nd ref="1467739588" />
+    <tag k="name" v="North Kaibab Trail" />
+    <tag k="layer" v="1" />
+    <tag k="bridge" v="yes" />
+    <tag k="highway" v="footway" />
+    <tag k="zmeucolor" v="red" />
+  </way>
+  <way changeset="12703330" id="99999999" timestamp="2012-08-12T15:58:04Z" uid="24920" user="Schusch" version="2">
+    <nd ref="3279125292" />
+    <nd ref="3601146925" />
+    <tag k="name" v="North Kaibab Trail TEST" />
+    <tag k="layer" v="1" />
+    <tag k="bridge" v="yes" />
+    <tag k="highway" v="notreally" />
+    <tag k="zmeucolor" v="red" />
+  </way>
+  <way changeset="17065753" id="39703740" timestamp="2013-07-23T18:42:01Z" uid="183021" user="tomthepom" version="5">
+    <nd ref="476033384" />
+    <nd ref="476033640" />
+    <tag k="name" v="Bright Angel Suspension Bridge TEST" />
+    <tag k="layer" v="1" />
+    <tag k="bridge" v="yes" />
+    <tag k="highway" v="footway" />
+    <tag k="alt_name" v="Silver Bridge" />
+    <tag k="zmeucolor" v="red" />
+  </way>
+<node changeset="12700232" id="1862787943" lat="36.2393212" lon="-112.0474108" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" version="1" />
+  <node changeset="12700232" id="1862787944" lat="36.239377" lon="-112.0475624" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" version="1" />
+  <node changeset="12700232" id="1862787945" lat="36.2393945" lon="-112.0476379" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" version="1" />
+  <node changeset="12700232" id="1862787946" lat="36.2394677" lon="-112.0468385" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" version="1" />
+  <node changeset="12700232" id="1862787947" lat="36.2396069" lon="-112.0467204" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" version="1" />
+  <node changeset="12700232" id="1862787949" lat="36.2396655" lon="-112.0475561" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" version="1" />
+  <node changeset="12700232" id="1862787967" lat="36.2404423" lon="-112.0473199" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" version="1" />
+  <node changeset="12700232" id="1862787968" lat="36.2404495" lon="-112.0475107" timestamp="2012-08-12T11:06:31Z" uid="24920" user="Schusch" version="1" />
+
+  <node changeset="12738796" id="1867258408" lat="36.0337569" lon="-111.8196722" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" version="1" />
+  <node changeset="12738796" id="1867258409" lat="36.0337637" lon="-111.8193618" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" version="1" />
+  <node changeset="12738796" id="1867258411" lat="36.0337802" lon="-111.8197112" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" version="1" />
+  <node changeset="12738796" id="1867258412" lat="36.0337939" lon="-111.8193312" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" version="1" />
+  <node changeset="12738796" id="1867258421" lat="36.034012" lon="-111.819757" timestamp="2012-08-15T13:03:55Z" uid="86654" user="e1l52" version="1" />
+  <node changeset="12738796" id="1867258423" lat="36.0340463" lon="-111.8197485" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" version="1" />
+  <node changeset="12738796" id="1867258425" lat="36.0340806" lon="-111.8193889" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" version="1" />
+  <node changeset="12738796" id="1867258426" lat="36.0340834" lon="-111.8200844" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" version="1" />
+  <node changeset="12738796" id="1867258427" lat="36.0340916" lon="-111.8210208" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" version="1" />
+  <node changeset="12738796" id="1867258428" lat="36.0341328" lon="-111.8194449" timestamp="2012-08-15T13:03:56Z" uid="86654" user="e1l52" version="1" />
+
+  <node changeset="794649" id="359252270" lat="36.0094279" lon="-112.3896212" timestamp="2009-03-12T00:46:19Z" uid="4732" user="iandees" version="1">
+    <tag k="ele" v="1817" />
+    <tag k="name" v="TK Tank" />
+    <tag k="landuse" v="reservoir" />
+    <tag k="gnis:created" v="02/08/1980" />
+    <tag k="gnis:state_id" v="04" />
+    <tag k="gnis:county_id" v="005" />
+    <tag k="gnis:feature_id" v="12102" />
+  </node>
+
+  <way changeset="12700232" id="175717387" timestamp="2012-08-12T11:06:39Z" uid="24920" user="Schusch" version="1">
+    <nd ref="1862787945" />
+    <nd ref="1862787949" />
+    <nd ref="1862787968" />
+    <nd ref="1862787967" />
+    <nd ref="1862787947" />
+    <nd ref="1862787946" />
+    <nd ref="1862787943" />
+    <nd ref="1862787945" />
+    <tag k="landuse" v="meadow" />
+  </way>
+
+  <way changeset="15203586" id="176173078" timestamp="2013-02-28T23:33:11Z" uid="183021" user="tomthepom" version="2">
+    <nd ref="1867258423" />
+    <nd ref="1867258428" />
+    <nd ref="1867258425" />
+    <nd ref="1867258412" />
+    <nd ref="1867258409" />
+    <nd ref="1867258408" />
+    <nd ref="1867258411" />
+    <nd ref="1867258421" />
+    <nd ref="1867258423" />
+    <tag k="landuse" v="nonexistant_test" />
+  </way>
+</osm>
