@@ -179,3 +179,25 @@ class WayCoordinateFilter:
             if self.minx <= x and x <= self.maxx and self.miny <= y and y <= self.maxy:
                 return True
         return False
+
+def merge(osm_datas):
+    """
+    Merges several OSMdatas into one. Takes a list of OSMdatas as a parameter. 
+    Returns a combined OSMdata. Entity doubles are not checked or removed, so the 
+    combined XML may combine doubles. The combined XML tree is the attribute tree 
+    of the OSMdata that is returned.
+    """
+    trees = []
+    for osm_data in osm_datas:
+        trees.append(osm_data.tree)
+    result_xml_element_tree = None
+    for osm_tree in trees:
+        if result_xml_element_tree is None:
+            result_xml_element_tree = osm_tree
+        else:
+            for child in osm_tree.getroot().iterfind('.'):
+                result_xml_element_tree.getroot().extend(child) 
+    if result_xml_element_tree is not None:
+        resultOSMdata = OSMData()
+        resultOSMdata.tree = result_xml_element_tree
+        return resultOSMdata

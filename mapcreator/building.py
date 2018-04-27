@@ -211,11 +211,17 @@ def insert_colors(osmstatus, debug = False):
 def prepare_write(osmstatus, debug = False):
     map(lambda data: data.prepare_for_save(), osmstatus.osmdata)
 
-def write(osmstatus, debug = False): #TODO: Combine these instead of saving multiple output files
-    for data in osmstatus.osmdata:
-        outpath = path.join(FINALIZED_DIR, FINAL_OSM_FORMAT.format(osmstatus.get_index()))
-        data.save(outpath)
-        osmstatus.add_result_file(outpath)
+# Combines several OSM-files and writes out only on OSM file
+def write(osmstatus, debug = False):
+    if len(osmstatus.osmdata) > 1:
+        combined_osmdata = osm.OSMMerger().merge(osmstatus.osmdata)
+    elif len(osmstatus.osmdata) == 1:
+        combined_osmdata = osmstatus.osmdata
+    else: return
+    
+    outpath = path.join(FINALIZED_DIR, FINAL_OSM_FORMAT.format(0))
+    combined_osmdata.save(outpath)
+    osmstatus.add_result_file(outpath)
 
 # Satellite image status and actions
 class SatelliteStatus:

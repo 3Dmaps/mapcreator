@@ -1,11 +1,11 @@
 import os
 import shutil
-from mapcreator.osm import OSMData, areaFilter, WayCoordinateFilter, trailFilter
+from mapcreator.osm import OSMData, areaFilter, WayCoordinateFilter, trailFilter, merge
 from mapcreator.building import OSMStatus
 from os import path, mkdir
 from util import get_resource_path, assert_xml_equal
 
-CLEAN_TEMP_DIR = True
+CLEAN_TEMP_DIR = False
 TEMP_DIR = '.test_osm'
 
 def setup_function(function):
@@ -87,6 +87,17 @@ def test_osm_trailfilter_with_coordinates():
     data.save(result_path)
     assert_xml_equal(get_resource_path('test_osm_trails_and_coordinates_expected.xml'), result_path)
 
+def test_osm_merger():
+    trails = OSMData.load(get_resource_path('test_osm_trails_input.xml'))
+    terrains = OSMData.load(get_resource_path('test_osm_terrains_input.xml'))
+    combined = merge([trails, terrains])
+    result_path = path.join(TEMP_DIR, 'test_osm_combined_result.xml')
+    combined.tree.write(result_path, encoding='utf-8', xml_declaration=True)
+    assert_xml_equal(get_resource_path('test_osm_combined_result.xml'), result_path)
+    
 def teardown_function(function):
     if CLEAN_TEMP_DIR and path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
+
+    
+
