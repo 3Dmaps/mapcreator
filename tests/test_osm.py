@@ -5,7 +5,7 @@ from mapcreator.building import OSMStatus
 from os import path, mkdir
 from util import get_resource_path, assert_xml_equal
 
-CLEAN_TEMP_DIR = False
+CLEAN_TEMP_DIR = True
 TEMP_DIR = '.test_osm'
 
 def setup_function(function):
