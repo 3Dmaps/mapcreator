@@ -25,66 +25,17 @@ mapcreator --help
 ```
 mapcreator \[command] --help
 ```
-## Commands 
-
-
-
 
 ### Commands
 
 | Command                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `add_area_color`   |  Adds one area color for OSM data.                                                                                                                                                                                                                                                                                                                    |
-| `add_area_color --help`        | Usage: mapcreator add_area_color [OPTIONS] TAG RED GREEN BLUE
-
-  Adds one area color for OSM data.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `add_area_colors` | Adds multiple area colors for OSM data.                                                                                                                                                                                                                                                                                                                                                                                           |
-| `add_area_colors --help`  | Usage: mapcreator add_area_colors [OPTIONS]
-
-  Adds multiple area colors for OSM data.
-
-  The colors should be inputted one color per line in the following format:
-
-  TAG RED GREEN BLUE
-
-  where TAG is OSM landuse value and RED, GREEN and BLUE are the color's RGB
-  value (each of them an integer between 0 and 255). For example
-
-  meadow 10 200 10
-
-  forest 20 100 20
-
-  The command reads lines until a blank line or an EOF is encountered. You
-  can either input the lines straight into the terminal, or use piping:
-
-  cat colors | mapcreator add_area_colors
-
-Options:
-  -d, --debug  Causes additional information to be printed on error
-  --help       Show this message and exit.                                                                                                                                                                                                                                                                                                                                                                                          |
-| `add_height_files`       | Adds given height data files to the project                                                                                                                                                                                  |
-| `add_height_files --help`    | Usage: mapcreator add_height_files [OPTIONS] [FILES]...
-
-  Adds given height data files to the project
-
-Options:
-  --help  Show this message and exit. |
-| `add_osm_files`      | Adds open street map files to the project                                                                                                                                                                                                                                                                                                                            |
-| `add_osm_files --help`      | Usage: mapcreator add_osm_files [OPTIONS] [FILES]...
-
-  Adds open street map files to the project
-
-Options:
-  --help  Show this message and exit.                                                                                                                                                                                                                                                                                                              |
-| `add_satellite_files`      | Adds given satellite image files to the...                                                                                                                                                                                                                                                                                                                           |
-| `add_satellite_files --help`       | Usage: mapcreator add_satellite_files [OPTIONS] [FILES]...
-
-  Adds given satellite image files to the project
-
-Options:
-  --help  Show this message and exit.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `build`          | Builds the project.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `add_area_color`   |  Adds one area color for OSM data.                                                                                                                                                                                                                                                                                                                             |
+| `add_area_colors`        | Adds multiple area colors for OSM data.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `add_height_files`        | Adds given height data files to the project                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `add_osm_files`        | Adds open street map files to the project                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `add_satellite_files`        | Adds given satellite image files to the...                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `build`        | Builds the project.                                                                                                                                                                                                                                                                                                                                               |                                                                                              |
 
 
 ## Sample command sequence
