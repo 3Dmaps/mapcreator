@@ -81,8 +81,6 @@ The project uses Travis as its continous integration platform. Travis automatica
 ## Built With
 * [Python 3](https://www.python.org/)
 
-## Versioning
-Versioning. *Not defined yet.*
 
 ## Supported source data formats
 Supported altitude model and satellite/aerial image source file formats are the same as those supported by GDAL (http://www.gdal.org/formats_list.html). Mapcreator uses GDAL for processing the input data. Examples of altitude source data formats are ASCII Grid (.asc) and GeoTIFF (.tif). Examples of satellite and aerial image source data formats are JPEG2000 (.jp2) and GeoTIFF (.tif). 
