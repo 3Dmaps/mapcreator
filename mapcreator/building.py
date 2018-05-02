@@ -214,7 +214,7 @@ def prepare_write(osmstatus, debug = False):
 # Combines several OSM-files and writes out only on OSM file
 def write(osmstatus, debug = False):
     if len(osmstatus.osmdata) > 1:
-        combined_osmdata = osm.OSMMerger().merge(osmstatus.osmdata)
+        combined_osmdata = osm.merge(osmstatus.osmdata)
     elif len(osmstatus.osmdata) == 1:
         combined_osmdata = osmstatus.osmdata
     else: return
