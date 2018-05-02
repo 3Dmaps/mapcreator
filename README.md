@@ -72,6 +72,11 @@ The resulting map data is saved in the file 3dmapdata.zip:
 * XML file containing trails and terrain types (heightfile0_trails.xml)
 * satellite/aerial image file (heightfile0_satellite.png)
 
+## Supported source data formats
+Supported altitude model and satellite/aerial image source file formats are the same as those supported by GDAL (http://www.gdal.org/formats_list.html). Mapcreator uses GDAL for processing the input data. Examples of altitude source data formats are ASCII Grid (.asc) and GeoTIFF (.tif). Examples of satellite and aerial image source data formats are JPEG2000 (.jp2) and GeoTIFF (.tif). 
+
+Route, point of interest and landuse data must be in Open Street Map XML-format (usually .xml or .osm). OSM source data can be exported from https://www.openstreetmap.org/.
+
 ## Running the tests
 To locally run the automated tests, enter `pytest` in the project's root folder.
 
@@ -80,12 +85,7 @@ The project uses Travis as its continous integration platform. Travis automatica
 
 ## Built With
 * [Python 3](https://www.python.org/)
-
-
-## Supported source data formats
-Supported altitude model and satellite/aerial image source file formats are the same as those supported by GDAL (http://www.gdal.org/formats_list.html). Mapcreator uses GDAL for processing the input data. Examples of altitude source data formats are ASCII Grid (.asc) and GeoTIFF (.tif). Examples of satellite and aerial image source data formats are JPEG2000 (.jp2) and GeoTIFF (.tif). 
-
-Route, point of interest and landuse data must be in Open Street Map XML-format (usually .xml or .osm). OSM source data can be exported from https://www.openstreetmap.org/.
+* [Click](http://click.pocoo.org/5/)
 
 ## Source data licensing
 Repository contains source geographic data from the following sources:
