@@ -170,6 +170,7 @@ def test_translate_heightfile(mock_call):
     assert status.result_files == [outpath1, metapath1, outpath2, metapath2]
 
 def test_insert_colors():
+    test_init_build()
     data = OSMData.load(get_resource_path('test_osm_terrains_input.xml'))
     state = State()
     state.add_area_color('meadow', 0, 255, 0)
@@ -218,5 +219,4 @@ def test_translate_satellite_to_png(mock_call):
 
 def teardown_function(function):
     if path.exists(building.BUILD_DIR):
-        pass
-    #    shutil.rmtree(building.BUILD_DIR)
+        shutil.rmtree(building.BUILD_DIR)
